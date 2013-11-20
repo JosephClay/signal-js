@@ -3,28 +3,39 @@
 
 var Signal = (function() {
 
-	var _NAME_REGEX = /\w([^:\.])*/g;
+	var _NAME_REGEX = /\w([^:\.])*/g,
+		_NAME = 'signal',
+		_splicer = ([]).splice,
+		_extend = function() {
+			var args = arguments,
+				base = args[0],
+				idx = 1, length = args.length,
+				key, merger;
+			for (; idx < length; idx += 1) {
+				merger = args[idx];
+				
+				for (key in merger) {
+					base[key] = merger[key];
+				}
+			}
+		};
 
-	var Events = function() {
-		this.reset();
+	var Signal = function() {
+		this._cache = {};
+		this._active = {};
+		this._inactive = {};
+		this._subid = 0;
+		this._subscriptions = {};
 	};
-	
-	Events.construct = function() {
-		return new Events();
+
+	Signal.construct = function() {
+		return new Signal();
 	};
 
-	Events.prototype = {
-
-		reset: function() {
-			this._active = {};
-			this._inactive = {};
-			this._subid = 0;
-			this._subscriptions = {};
-			return this;
-		},
+	Signal.prototype = {
 
 		subscribe: function(name, func) {
-			var id = this._uniqueSubId(),
+			var id = this._uniqueSubId(_NAME),
 				location = this._subscriptions[name] || (this._subscriptions[name] = []);
 
 			func.__subid__ = id;
@@ -38,7 +49,7 @@ var Signal = (function() {
 			if (!location) { return; }
 
 			var idx = 0, length = location.length;
-			for (; idx < length; idx++) {
+			for (; idx < length; idx += 1) {
 				if (location[idx].__subid__ === id) {
 					location.splice(idx, 1);
 					return true;
@@ -49,30 +60,21 @@ var Signal = (function() {
 		},
 
 		dispatch: function() {
-			var args = _.toArray(arguments),
-				name = args.splice(0, 1)[0],
-				location = this._subscriptions[name],
-				idx = 0, length = location.length;
+			var args = arguments,
+				name = _splicer.call(args, 0, 1)[0],
+				location = this._subscriptions[name] || (this._subscriptions[name] = []),
+				idx = 0, length = location.length,
+				func;
 			for (; idx < length; idx++) {
-				location[idx].apply(null, args);
+				func = location[idx];
+				if (func) { func.apply(null, args); }
 			}
 		},
 
-		/* Create | Clear | Revert *************************************/
-		create: function(handle, events) {
-			var key, eventConfig;
-			for (key in events) {
-				eventConfig = this._getEventConfig(handle + ':' + key);
-				this._createEventLocation(eventConfig, this._active);
-				this._active[eventConfig.handle][eventConfig.evt][eventConfig.namespace] = events[key];
-			}
-
-			return this;
-		},
-
+		/* Disable | Enable *************************************/
 		disable: function(handle) {
 			this._inactive[handle] = this._inactive[handle] || {};
-			this._inactive[handle] = _.extend({}, this._active[handle]);
+			this._inactive[handle] = _extend({}, this._active[handle]);
 			delete this._active[handle];
 
 			return this;
@@ -80,7 +82,7 @@ var Signal = (function() {
 
 		enable: function(handle) {
 			this._active[handle] = this._active[handle] || {};
-			this._active[handle] = _.extend({}, this._inactive[handle]);
+			this._active[handle] = _extend({}, this._inactive[handle]);
 			delete this._inactive[handle];
 
 			return this;
@@ -88,16 +90,33 @@ var Signal = (function() {
 
 		/* On | Off ************************************************/
 		on: function(eventname, callback) {
-			var eventConfig = this._getEventConfig(eventname),
+			var eventConfig, location,
+				cacheConfig = this._cache[eventname];
+			
+			if (cacheConfig) {
+				eventConfig = cacheConfig;
+				location = this._getEventLocation(eventConfig);
+			} else {
+				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
 				location = this._createEventLocation(eventConfig);
+			}
+
 			location.push(callback);
 
 			return this;
 		},
 		off: function(eventname) {
-			var eventConfig = this._getEventConfig(eventname);
+			var eventConfig,
+				cacheConfig = this._cache[eventname];
+			
+			if (cacheConfig) {
+				eventConfig = cacheConfig;
+			} else {
+				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
+			}
+
 			if (eventConfig.hasNamespace) { // Has a namespace
-				this._active[eventConfig.handle][eventConfig.evt][eventConfig.namespace] = [];
+				this._active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
 			} else { // Does not have a namespace
 				this._active[eventConfig.handle][eventConfig.evt] = { '': [] };
 			}
@@ -105,16 +124,34 @@ var Signal = (function() {
 			return this;
 		},
 		once: function(eventname, callback) {
-			return this.on(eventname, _.once(callback));
+			var hasRan = false, memo;
+			
+			return this.on(eventname, function() {
+				return function() {
+					if (hasRan) { return memo; }
+					hasRan = true;
+
+					memo = callback.apply(this, arguments);
+					callback = null;
+
+					return memo;
+				};
+			});
 		},
 
 		/* Trigger ************************************************/
 		trigger: function() {
-			var args = _.toArray(arguments),
-				eventname = args.splice(0, 1)[0],
-				eventConfig = this._getEventConfig(eventname),
-				location = this._getEventLocation(eventConfig);
+			var args = arguments,
+				eventname = _splicer.call(args, 0, 1)[0],
+				cacheConfig = this._cache[eventname];
 
+			if (cacheConfig) {
+				eventConfig = cacheConfig;
+			} else {
+				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
+			}
+
+			var location = this._getEventLocation(eventConfig);
 			if (!location) { return this; }
 
 			if (eventConfig.hasNamespace) { // If there's a namespace, trigger only that array
@@ -131,21 +168,12 @@ var Signal = (function() {
 
 		/* ListenTo | StopListening ********************************/
 		listenTo: function(obj, eventname, callback) {
-			this._listenCheck(obj);
 			obj.on(eventname, callback);
-
 			return this;
 		},
 		stopListening: function(obj, eventname) {
-			this._listenCheck(obj);
 			obj.off(eventname);
-
 			return this;
-		},
-		_listenCheck: function(obj) {
-			if (!obj || !obj.on || !obj.off) {
-				throw new Error('Object cannot be listened to: '+ obj);
-			}
 		},
 
 		/* Private *************************************************/
@@ -153,38 +181,48 @@ var Signal = (function() {
 			return 's' + this._subid++;
 		},
 
-		_getEvent: function(eventname) {
-			// Ensure the location exists and return the event
-			return this._createEventLocation(this._getEventConfig(eventname));
-		},
-
 		_callEventArray: function(events, args) {
 			args = args || [];
 
 			var idx = 0, length = events.length,
-				blankFunc = function() {},
 				evt;
-			for (; idx < length; idx++) {
+			for (; idx < length; idx += 1) {
 				evt = events[idx];
 				if (!evt) { continue; }
 				if (evt.apply(null, args) === false) { return; }
 			}
 		},
 
-		_getEventConfig: function(eventname) {
+		_parseConfig: function(eventname) {
 			var hasHandle = (eventname.indexOf(':') !== -1) ? true : false,
 				hasNamespace = (eventname.indexOf('.') !== -1) ? true : false,
 				matches = eventname.match(_NAME_REGEX),
 				eventConfig = {};
 
 			if (hasHandle && hasNamespace) { // Has handle, event, namespace
-				eventConfig = { handle: matches[0], evt: matches[1], namespace: matches[2] };
+				
+				eventConfig.handle = matches[0];
+				eventConfig.evt = matches[1];
+				eventConfig.namespace = matches[2];
+
 			} else if (hasHandle && !hasNamespace) { // Has handle and event
-				eventConfig = { handle: matches[0], evt: matches[1], namespace: '' };
+				
+				eventConfig.handle = matches[0];
+				eventConfig.evt = matches[1];
+				eventConfig.namespace = '';
+
 			} else if (hasNamespace && !hasHandle) { // Has event and namespace
-				eventConfig = { handle: '', evt: matches[0], namespace: matches[1] };
+				
+				eventConfig.handle = '';
+				eventConfig.evt = matches[0];
+				eventConfig.namespace = matches[1];
+
 			} else { // Has event
-				eventConfig = { handle: '', evt: matches[0], namespace: '' };
+				
+				eventConfig.handle = '';
+				eventConfig.evt = matches[0];
+				eventConfig.namespace = '';
+
 			}
 
 			eventConfig.hasHandle = hasHandle;
@@ -222,10 +260,10 @@ var Signal = (function() {
 		},
 
 		toString: function() {
-			return '[ Signal ]';
+			return '[Signal]';
 		}
 	};
 
-	return new Events();
+	return new Signal();
 
 }());
