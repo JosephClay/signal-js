@@ -33,34 +33,32 @@ var Signal = (function() {
 		return new Signal();
 	};
 
-	Signal.extend = function() {
+	Signal.extend = function(constructor, extension) {
 		var hasConstructor = (typeof constructor === 'function');
-        if (!hasConstructor) { extension = constructor; }
+		if (!hasConstructor) { extension = constructor; }
 
-        var self = this,
-            fn = function() {
-                var ret = self.apply(this, arguments);
-                if (hasConstructor) {
-                    ret = constructor.apply(this, arguments);
-                } else if (this.initialize) {
-                    this.initialize.apply(this, arguments);
-                }
-                return ret;
-            };
+		var self = this,
+			fn = function() {
+				var ret = self.apply(this, arguments);
+				if (hasConstructor) {
+					ret = constructor.apply(this, arguments);
+				}
+				return ret;
+			};
 
-        // Add properties to the object
-        _extend(fn, this);
+		// Add properties to the object
+		_extend(fn, this);
 
-        // Duplicate the prototype
-        var NoOp = function() {};
-        NoOp.prototype = this.prototype;
-        fn.prototype = new NoOp();
+		// Duplicate the prototype
+		var NoOp = function() {};
+		NoOp.prototype = this.prototype;
+		fn.prototype = new NoOp();
 
-        // Merge the prototypes
-        _extend(fn.prototype, this.prototype, extension);
-        fn.prototype.constructor = constructor || fn;
+		// Merge the prototypes
+		_extend(fn.prototype, this.prototype, extension);
+		fn.prototype.constructor = constructor || fn;
 
-        return fn;
+		return fn;
 	};
 
 	Signal.prototype = {
@@ -297,6 +295,17 @@ var Signal = (function() {
 		}
 	};
 
-	return new Signal();
+	// Create a pub/sub to expose Signal as
+	// e.g. Signal.on(), Signal.trigger()
+	var pubSub = new Signal();
+	
+	// Attach the Signal object as a property
+	// of the exposed object so that new instances
+	// can be constructed/extended
+	// e.g. Signal.core.construct(), Signal.core.extend({})
+	pubSub.core = Signal;
+
+	// Expose
+	return pubSub;
 
 }());
