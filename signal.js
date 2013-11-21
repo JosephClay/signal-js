@@ -34,6 +34,8 @@ var Signal = (function() {
 
 	Signal.prototype = {
 
+		constructor: Signal,
+
 		subscribe: function(name, func) {
 			var id = this._uniqueSubId(_NAME),
 				location = this._subscriptions[name] || (this._subscriptions[name] = []);
