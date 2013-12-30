@@ -4,9 +4,22 @@
 
 var Signal = (function() {
 
+		/**
+		 * Cached regex used to parse event string
+		 * @type {RegExp}
+		 */
 	var _NAME_REGEX = /\w([^:\.])*/g,
-		_NAME = 'signal',
+		/**
+		 * Quick reference to Array.prototype.splice
+		 * for duplicating arrays
+		 * @type {Function}
+		 */
 		_splicer = ([]).splice,
+		/**
+		 * Object merger
+		 * @param {Objects}
+		 * @return {Object}
+		 */
 		_extend = function() {
 			var args = arguments,
 				base = args[0],
@@ -19,20 +32,53 @@ var Signal = (function() {
 					base[key] = merger[key];
 				}
 			}
-		};
+		},
+		/**
+		 * Unique Id
+		 * @type {Number}
+		 */		
+		_subid = 0;
 
 	var Signal = function() {
+		/**
+		 * Holds cached, parsed event keys by string
+		 * @type {Object}
+		 */
 		this._cache = {};
+
+		/**
+		 * Holds active events by handle + event + namespace
+		 * @type {Object}
+		 */
 		this._active = {};
-		this._inactive = {};
-		this._subid = 0;
-		this._subscriptions = {};
+		
+		/**
+		 * Holds inactive events by handle - lazy creation
+		 * @type {Object}
+		 */
+		// this._inactive;
+
+		/**
+		 * Holds subscriptions - lazy creation
+		 * @type {Object}
+		 */
+		// this._subscriptions;
 	};
 
+	/**
+	 * Returns a new Signal instance
+	 * @return {Signal}
+	 */
 	Signal.construct = function() {
 		return new Signal();
 	};
 
+	/**
+	 * Klass extend method
+	 * @param  {Function} constructor
+	 * @param  {Object} extension   prototype extension
+	 * @return {Function} constructor
+	 */
 	Signal.extend = function(constructor, extension) {
 		var hasConstructor = (typeof constructor === 'function');
 		if (!hasConstructor) { extension = constructor; }
@@ -66,7 +112,9 @@ var Signal = (function() {
 		constructor: Signal,
 
 		subscribe: function(name, func) {
-			var id = this._uniqueSubId(_NAME),
+			this._subscriptions = this._subscriptions || {};
+
+			var id = this._uniqueSubId(),
 				location = this._subscriptions[name] || (this._subscriptions[name] = []);
 
 			func.__subid__ = id;
@@ -76,6 +124,8 @@ var Signal = (function() {
 		},
 
 		unsubscribe: function(name, id) {
+			this._subscriptions = this._subscriptions || {};
+			
 			var location = this._subscriptions[name];
 			if (!location) { return; }
 
@@ -91,6 +141,8 @@ var Signal = (function() {
 		},
 
 		dispatch: function() {
+			this._subscriptions = this._subscriptions || {};
+
 			var args = arguments,
 				name = _splicer.call(args, 0, 1)[0],
 				location = this._subscriptions[name] || (this._subscriptions[name] = []),
@@ -104,6 +156,7 @@ var Signal = (function() {
 
 		/* Disable | Enable *************************************/
 		disable: function(handle) {
+			this._inactive = this._inactive || {};
 			this._inactive[handle] = this._inactive[handle] || {};
 			this._inactive[handle] = _extend({}, this._active[handle]);
 			delete this._active[handle];
@@ -112,6 +165,7 @@ var Signal = (function() {
 		},
 
 		enable: function(handle) {
+			this._inactive = this._inactive || {};
 			this._active[handle] = this._active[handle] || {};
 			this._active[handle] = _extend({}, this._inactive[handle]);
 			delete this._inactive[handle];
@@ -136,6 +190,8 @@ var Signal = (function() {
 
 			return this;
 		},
+		bind: function() { this.on.apply(this, arguments); },
+		
 		off: function(eventname) {
 			var eventConfig,
 				cacheConfig = this._cache[eventname];
@@ -154,6 +210,8 @@ var Signal = (function() {
 
 			return this;
 		},
+		unbind: function() { this.off.apply(this, arguments); },
+
 		once: function(eventname, callback) {
 			var hasRan = false, memo;
 			
@@ -209,7 +267,7 @@ var Signal = (function() {
 
 		/* Private *************************************************/
 		_uniqueSubId: function() {
-			return 's' + this._subid++;
+			return 's' + _subid++;
 		},
 
 		_callEventArray: function(events, args) {
