@@ -183,7 +183,7 @@ var Signal = (function() {
 				location = this._getEventLocation(eventConfig);
 			} else {
 				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
-				location = this._createEventLocation(eventConfig);
+				location = this._getEventLocation(eventConfig);
 			}
 
 			location.push(callback);
@@ -241,7 +241,6 @@ var Signal = (function() {
 			}
 
 			var location = this._getEventLocation(eventConfig);
-			if (!location) { return this; }
 
 			if (eventConfig.hasNamespace) { // If there's a namespace, trigger only that array
 				this._callEventArray(location, args);
@@ -321,24 +320,6 @@ var Signal = (function() {
 		},
 
 		_getEventLocation: function(eventConfig, location) {
-			location = location || this._active;
-
-			var handle = location[eventConfig.handle];
-			if (!handle) { return; }
-
-			var evts = handle[eventConfig.evt];
-			if (!evts) { return; }
-
-			if (!eventConfig.hasNamespace) { return evts; }
-
-			var namespace = evts[eventConfig.namespace];
-			if (!namespace) { return; }
-
-			// Return the location
-			return namespace;
-		},
-
-		_createEventLocation: function(eventConfig, location) {
 			location = location || this._active;
 
 			var handle = location[eventConfig.handle] || (location[eventConfig.handle] = {}),
