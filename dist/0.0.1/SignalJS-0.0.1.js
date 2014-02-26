@@ -1,10 +1,6 @@
 /*! SignalJS - v0.0.1 - 2014-02-26
  * https://github.com/JosephClay/SignalJS
- * Copyright (c) 2012-2014 Joe Clay; Licensed  */
-/*! Signal.js - v0.0.2 - 2013-11-23
- * https://github.com/JosephClay/Signal
- * Signal may be freely distributed under the MIT license. */
-
+ * Copyright (c) 2013-2014 Joe Clay; License: MIT */
 var Signal = (function() {
 
 		/**

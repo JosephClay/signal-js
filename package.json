@@ -4,6 +4,7 @@
   "description": "Small and simple JavaScript event system.",
   "version": "0.0.1",
   "homepage": "https://github.com/JosephClay/SignalJS",
+  "license": "MIT",
   "author": {
     "name": "Joe Clay",
     "email": "testingriven@gmail.com"

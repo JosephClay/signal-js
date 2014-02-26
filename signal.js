@@ -1,7 +1,3 @@
-/*! Signal.js - v0.0.2 - 2013-11-23
- * https://github.com/JosephClay/Signal
- * Signal may be freely distributed under the MIT license. */
-
 var Signal = (function() {
 
 		/**

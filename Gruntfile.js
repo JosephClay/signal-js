@@ -18,8 +18,8 @@ module.exports = function(grunt) {
 			'/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
 			'<%= grunt.template.today("yyyy-mm-dd") %>\n' +
 			'<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
-			' * Copyright (c) 2012-<%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
-			' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
+			' * Copyright (c) 2013-<%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
+			' License: <%= pkg.license %> */\n',
 		directories: {
 			dist: 'dist/<%= pkg.version %>'
 		},
