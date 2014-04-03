@@ -4,7 +4,7 @@ var Signal = (function() {
 		 * Cached regex used to parse event string
 		 * @type {RegExp}
 		 */
-	var _NAME_REGEX = /\w([^:\.])*/g,
+	var _NAME_REGEX = /(?:([\w-]+):)?([\w-]*)(?:.([\w-]+))?/,
 		/**
 		 * Quick reference to Array.prototype.splice
 		 * for duplicating arrays
@@ -23,7 +23,7 @@ var Signal = (function() {
 				key, merger;
 			for (; idx < length; idx += 1) {
 				merger = args[idx];
-				
+
 				for (key in merger) {
 					base[key] = merger[key];
 				}
@@ -32,7 +32,7 @@ var Signal = (function() {
 		/**
 		 * Unique Id
 		 * @type {Number}
-		 */		
+		 */
 		_subid = 0;
 
 	var Signal = function() {
@@ -47,7 +47,7 @@ var Signal = (function() {
 		 * @type {Object}
 		 */
 		this._active = {};
-		
+
 		/**
 		 * Holds inactive events by handle - lazy creation
 		 * @type {Object}
@@ -121,7 +121,7 @@ var Signal = (function() {
 
 		unsubscribe: function(name, id) {
 			this._subscriptions = this._subscriptions || {};
-			
+
 			var location = this._subscriptions[name];
 			if (!location) { return; }
 
@@ -173,7 +173,7 @@ var Signal = (function() {
 		on: function(eventname, callback) {
 			var eventConfig, location,
 				cacheConfig = this._cache[eventname];
-			
+
 			if (cacheConfig) {
 				eventConfig = cacheConfig;
 				location = this._getEventLocation(eventConfig);
@@ -187,18 +187,31 @@ var Signal = (function() {
 			return this;
 		},
 		bind: function() { this.on.apply(this, arguments); },
-		
+
 		off: function(eventname) {
 			var eventConfig,
 				cacheConfig = this._cache[eventname];
-			
+
 			if (cacheConfig) {
 				eventConfig = cacheConfig;
 			} else {
 				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
 			}
 
-			if (eventConfig.hasNamespace) { // Has a namespace
+			if (eventConfig.evt === '') { // Removing a namespace
+
+				var events = this._active[eventConfig.handle],
+					eventName,
+					namespaceName;
+				for (eventName in events) {
+					for (namespaceName in events[eventName]) {
+						if (namespaceName === eventConfig.namespace) {
+							this._active[eventConfig.handle][eventName][namespaceName].length = 0;
+						}
+					}
+				}
+
+			} else if (eventConfig.namespace !== '') { // Has a namespace
 				this._active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
 			} else { // Does not have a namespace
 				this._active[eventConfig.handle][eventConfig.evt] = { '': [] };
@@ -210,7 +223,7 @@ var Signal = (function() {
 
 		once: function(eventname, callback) {
 			var hasRan = false, memo;
-			
+
 			return this.on(eventname, function() {
 				return function() {
 					if (hasRan) { return memo; }
@@ -238,7 +251,7 @@ var Signal = (function() {
 
 			var location = this._getEventLocation(eventConfig);
 
-			if (eventConfig.hasNamespace) { // If there's a namespace, trigger only that array
+			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
 				this._callEventArray(location, args);
 			} else { // Else, trigger everything registered to the event
 				var subSignal = this._active[eventConfig.handle][eventConfig.evt], key;
@@ -278,41 +291,16 @@ var Signal = (function() {
 		},
 
 		_parseConfig: function(eventname) {
-			var hasHandle = (eventname.indexOf(':') !== -1) ? true : false,
-				hasNamespace = (eventname.indexOf('.') !== -1) ? true : false,
-				matches = eventname.match(_NAME_REGEX),
-				eventConfig = {};
-
-			if (hasHandle && hasNamespace) { // Has handle, event, namespace
-				
-				eventConfig.handle = matches[0];
-				eventConfig.evt = matches[1];
-				eventConfig.namespace = matches[2];
-
-			} else if (hasHandle && !hasNamespace) { // Has handle and event
-				
-				eventConfig.handle = matches[0];
-				eventConfig.evt = matches[1];
-				eventConfig.namespace = '';
-
-			} else if (hasNamespace && !hasHandle) { // Has event and namespace
-				
-				eventConfig.handle = '';
-				eventConfig.evt = matches[0];
-				eventConfig.namespace = matches[1];
-
-			} else { // Has event
-				
-				eventConfig.handle = '';
-				eventConfig.evt = matches[0];
-				eventConfig.namespace = '';
-
-			}
-
-			eventConfig.hasHandle = hasHandle;
-			eventConfig.hasNamespace = hasNamespace;
-
-			return eventConfig;
+			var match = _NAME_REGEX.exec(eventname);
+			return {
+				// [0] : the entire match, don't care!
+				// [1] : handle
+				handle:    (match[1] === undefined) ? '' : match[1],
+				// [2] : event
+				evt:       (match[2] === undefined) ? '' : match[2],
+				// [3] : namespace
+				namespace: (match[3] === undefined) ? '' : match[3]
+			};
 		},
 
 		_getEventLocation: function(eventConfig, location) {
@@ -333,7 +321,7 @@ var Signal = (function() {
 	// Create a pub/sub to expose Signal as
 	// e.g. Signal.on(), Signal.trigger()
 	var pubSub = new Signal();
-	
+
 	// Attach the Signal object as a property
 	// of the exposed object so that new instances
 	// can be constructed/extended
