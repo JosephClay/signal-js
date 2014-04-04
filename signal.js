@@ -26,6 +26,13 @@
 				}
 			}
 		},
+
+		/**
+		 * Holds cached, parsed event keys by string
+		 * @type {Object}
+		 */
+		_cache = {},
+
 		/**
 		 * Unique Id
 		 * @type {Number}
@@ -52,8 +59,9 @@
 				namespace: (match[3] === undefined) ? '' : match[3]
 			};
 		};
-		this._cache = {};
 
+
+	var Signal = function() {
 		/**
 		 * Holds active events by handle + event + namespace
 		 * @type {Object}
@@ -238,12 +246,12 @@
 		trigger: function() {
 			var args = arguments,
 				eventname = _splicer.call(args, 0, 1)[0],
-				cacheConfig = this._cache[eventname];
+				cacheConfig = _cache[eventname];
 
 			if (cacheConfig) {
 				eventConfig = cacheConfig;
 			} else {
-				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
+				eventConfig = _cache[eventname] = _parseConfig(eventname);
 			}
 
 			var location = this._getEventLocation(eventConfig);
