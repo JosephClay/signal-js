@@ -1,4 +1,4 @@
-var Signal = (function() {
+(function(root, undefined) {
 
 		/**
 		 * Cached regex used to parse event string
@@ -35,7 +35,6 @@ var Signal = (function() {
 		 */
 		_subid = 0;
 
-	var Signal = function() {
 		/**
 		 * Holds cached, parsed event keys by string
 		 * @type {Object}
@@ -329,6 +328,6 @@ var Signal = (function() {
 	pubSub.core = Signal;
 
 	// Expose
-	return pubSub;
+	root.Signal = pubSub;
 
-}());
+}(this));
