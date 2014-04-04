@@ -249,15 +249,8 @@
 		trigger: function() {
 			var args = arguments,
 				eventname = _splicer.call(args, 0, 1)[0],
-				cacheConfig = _cache[eventname];
-
-			if (cacheConfig) {
-				eventConfig = cacheConfig;
-			} else {
-				eventConfig = _cache[eventname] = _parseConfig(eventname);
-			}
-
-			var location = this._evtLookup(eventConfig);
+				eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname)),
+				location = this._evtLookup(eventConfig);
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
 				this._callEvts(location, args);
