@@ -86,7 +86,7 @@
 	};
 
 	_extend(Signal, {
-		
+
 		/**
 		 * Returns a new Signal instance
 		 * @return {Signal}
@@ -135,10 +135,10 @@
 		constructor: Signal,
 
 		subscribe: function(name, func) {
-			this._subs = this._subs || {};
+			var subscriptions = this._subs || (this._subs = {});
 
 			var id = _uniqueId(),
-				location = this._subs[name] || (this._subs[name] = []);
+				location = subscriptions[name] || (subscriptions[name] = []);
 
 			func.__subid__ = id;
 			location.push(func);
@@ -147,9 +147,9 @@
 		},
 
 		unsubscribe: function(name, id) {
-			this._subs = this._subs || {};
+			var subscriptions = this._subs || (this._subs = {});
 
-			var location = this._subs[name];
+			var location = subscriptions[name];
 			if (!location) { return; }
 
 			var idx = 0, length = location.length;
@@ -164,11 +164,11 @@
 		},
 
 		dispatch: function() {
-			this._subs = this._subs || {};
+			var subscriptions = this._subs || (this._subs = {});
 
 			var args = arguments,
 				name = _ripFirstArg(args),
-				location = this._subs[name] || (this._subs[name] = []),
+				location = subscriptions[name] || (subscriptions[name] = []),
 				idx = 0, length = location.length,
 				func;
 			for (; idx < length; idx++) {
