@@ -226,6 +226,7 @@
 		},
 		unbind: function() { this.off.apply(this, arguments); },
 
+		// Based on underscore's once implementation
 		once: function(eventname, callback) {
 			var hasRan = false, memo;
 
