@@ -43,8 +43,8 @@
 		},
 
 		/**
-		 * Holds cached, parsed event keys by string
-		 * @type {Object}
+		 * Cached regex used to parse event string
+		 * @type {RegExp}
 		 */
 		_NAME_REGEX = /(?:([\w-]+):)?([\w-]*)(?:.([\w-]+))?/,
 		_parseConfig = function(eventname) {
