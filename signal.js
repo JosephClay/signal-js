@@ -205,7 +205,7 @@
 		// On | Off ************************************************
 		on: function(eventname, callback) {
 			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
-			
+
 			this._evtLookup(eventConfig).push(callback);
 
 			return this;
@@ -213,28 +213,29 @@
 		bind: function() { this.on.apply(this, arguments); },
 
 		off: function(eventname) {
-			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
+			var active = this._active,
+				eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
 
 			if (eventConfig.evt === '') { // Removing a namespace
 
-				var events = this._active[eventConfig.handle],
+				var events = active[eventConfig.handle],
 					eventName,
 					namespaceName;
 				for (eventName in events) {
 					for (namespaceName in events[eventName]) {
 						if (namespaceName === eventConfig.namespace) {
-							this._active[eventConfig.handle][eventName][namespaceName].length = 0;
+							active[eventConfig.handle][eventName][namespaceName].length = 0;
 						}
 					}
 				}
 
 			} else if (eventConfig.namespace !== '') { // Has a namespace
 				
-				this._active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
+				active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
 
 			} else { // Does not have a namespace
 				
-				this._active[eventConfig.handle][eventConfig.evt] = { '': [] };
+				active[eventConfig.handle][eventConfig.evt] = { '': [] };
 
 			}
 
