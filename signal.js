@@ -316,10 +316,6 @@
 		stopListening: function(obj, eventname) {
 			obj.off(eventname);
 			return this;
-		},
-
-		toString: function() {
-			return '[Signal]';
 		}
 	};
 
