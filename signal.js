@@ -254,14 +254,15 @@
 				eventConfig = _cache[eventname] = _parseConfig(eventname);
 			}
 
-			var location = this._getEventLocation(eventConfig);
+			var location = this._evtLookup(eventConfig);
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
-				this._callEventArray(location, args);
+				this._callEvts(location, args);
 			} else { // Else, trigger everything registered to the event
-				var subSignal = this._active[eventConfig.handle][eventConfig.evt], key;
+				var subSignal = this._active[eventConfig.handle][eventConfig.evt],
+					key;
 				for (key in subSignal) {
-					this._callEventArray(subSignal[key], args);
+					this._callEvts(subSignal[key], args);
 				}
 			}
 
@@ -278,8 +279,8 @@
 			return this;
 		},
 
-
-		_callEventArray: function(events, args) {
+		// Private *************************************************
+		_callEvts: function(events, args) {
 			args = args || [];
 
 			var idx = 0, length = events.length,
@@ -291,12 +292,12 @@
 			}
 		},
 
-		_getEventLocation: function(eventConfig, location) {
+		_evtLookup: function(eventConfig, location) {
 			location = location || this._active;
 
-			var handle = location[eventConfig.handle] || (location[eventConfig.handle] = {}),
-				evt = handle[eventConfig.evt] || (handle[eventConfig.evt] = {}),
-				namespace = evt[eventConfig.namespace] || (evt[eventConfig.namespace] = []);
+			var handle    = location[eventConfig.handle] || (location[eventConfig.handle] = {}),
+				evt       = handle[eventConfig.evt]      || (handle[eventConfig.evt]      = {}),
+				namespace = evt[eventConfig.namespace]   || (evt[eventConfig.namespace]   = []);
 
 			return namespace;
 		},
