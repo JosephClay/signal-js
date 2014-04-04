@@ -154,7 +154,7 @@
 			}
 		},
 
-		/* Disable | Enable *************************************/
+		// Disable | Enable *************************************
 		disable: function(handle) {
 			this._inactive = this._inactive || {};
 			this._inactive[handle] = this._inactive[handle] || {};
@@ -173,7 +173,7 @@
 			return this;
 		},
 
-		/* On | Off ************************************************/
+		// On | Off ************************************************
 		on: function(eventname, callback) {
 			var eventConfig, location,
 				cacheConfig = this._cache[eventname];
@@ -241,7 +241,7 @@
 			});
 		},
 
-		/* Trigger ************************************************/
+		// Trigger ************************************************
 		trigger: function() {
 			var args = arguments,
 				eventname = _splicer.call(args, 0, 1)[0],
@@ -267,7 +267,7 @@
 			return this;
 		},
 
-		/* ListenTo | StopListening ********************************/
+		// ListenTo | StopListening ********************************
 		listenTo: function(obj, eventname, callback) {
 			obj.on(eventname, callback);
 			return this;
