@@ -179,21 +179,23 @@
 
 		// Disable | Enable *************************************
 		disable: function(handle) {
-			this._inactive = this._inactive || {};
+			var active = this._active,
+				inactive = this._inactive || (this._inactive = {});
 
-			this._inactive[handle] = this._inactive[handle] || {};
-			this._inactive[handle] = _extend({}, this._active[handle]);
-			delete this._active[handle];
+			inactive[handle] = inactive[handle] || {};
+			inactive[handle] = _extend({}, active[handle]);
+			delete active[handle];
 
 			return this;
 		},
 
 		enable: function(handle) {
-			this._inactive = this._inactive || {};
+			var active = this._active,
+				inactive = this._inactive || (this._inactive = {});
 
-			this._active[handle] = this._active[handle] || {};
-			this._active[handle] = _extend({}, this._inactive[handle]);
-			delete this._inactive[handle];
+			active[handle] = active[handle] || {};
+			active[handle] = _extend({}, inactive[handle]);
+			delete inactive[handle];
 
 			return this;
 		},
