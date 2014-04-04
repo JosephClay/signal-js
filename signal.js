@@ -80,6 +80,14 @@
 				if (!evt) { continue; }
 				if (evt.apply(null, args) === false) { return; }
 			}
+		},
+
+		_eventLookup = function(eventConfig, location) {
+			var handle    = location[eventConfig.handle] || (location[eventConfig.handle] = {}),
+				evt       = handle[eventConfig.evt]      || (handle[eventConfig.evt]      = {}),
+				namespace = evt[eventConfig.namespace]   || (evt[eventConfig.namespace]   = []);
+
+			return namespace;
 		};
 
 
@@ -218,7 +226,7 @@
 		on: function(eventname, callback) {
 			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
 
-			this._evtLookup(eventConfig).push(callback);
+			_eventLookup(eventConfig, this._active).push(callback);
 
 			return this;
 		},
@@ -275,12 +283,13 @@
 		// Trigger ************************************************
 		trigger: function() {
 			var args = arguments,
+				active = this._active,
 				eventname = _ripFirstArg(args),
 				eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname)),
 				// Always do an event lookup. This ensures that the location
 				// of the event has been created so that calls to trigger
 				// for events that haven't been registered don't throw exceptions
-				location = this._evtLookup(eventConfig);
+				location = _eventLookup(eventConfig, active);
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
 				
@@ -288,7 +297,7 @@
 
 			} else { // Else, trigger everything registered to the event
 				
-				var subSignal = this._active[eventConfig.handle][eventConfig.evt],
+				var subSignal = active[eventConfig.handle][eventConfig.evt],
 					key;
 				for (key in subSignal) {
 					_callEvents(subSignal[key], args);
@@ -307,17 +316,6 @@
 		stopListening: function(obj, eventname) {
 			obj.off(eventname);
 			return this;
-		},
-
-		// Private *************************************************
-		_evtLookup: function(eventConfig, location) {
-			location = location || this._active;
-
-			var handle    = location[eventConfig.handle] || (location[eventConfig.handle] = {}),
-				evt       = handle[eventConfig.evt]      || (handle[eventConfig.evt]      = {}),
-				namespace = evt[eventConfig.namespace]   || (evt[eventConfig.namespace]   = []);
-
-			return namespace;
 		},
 
 		toString: function() {
