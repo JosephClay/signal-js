@@ -1,11 +1,6 @@
 (function(root, undefined) {
 
 		/**
-		 * Cached regex used to parse event string
-		 * @type {RegExp}
-		 */
-	var _NAME_REGEX = /(?:([\w-]+):)?([\w-]*)(?:.([\w-]+))?/,
-		/**
 		 * Quick reference to Array.prototype.splice
 		 * for duplicating arrays (while removing the 
 		 * first parameter ala trigger)
@@ -44,6 +39,19 @@
 		 * Holds cached, parsed event keys by string
 		 * @type {Object}
 		 */
+		_NAME_REGEX = /(?:([\w-]+):)?([\w-]*)(?:.([\w-]+))?/,
+		_parseConfig = function(eventname) {
+			var match = _NAME_REGEX.exec(eventname);
+			return {
+				// [0] : the entire match, don't care!
+				// [1] : handle
+				handle:    (match[1] === undefined) ? '' : match[1],
+				// [2] : event
+				evt:       (match[2] === undefined) ? '' : match[2],
+				// [3] : namespace
+				namespace: (match[3] === undefined) ? '' : match[3]
+			};
+		};
 		this._cache = {};
 
 		/**
@@ -175,16 +183,8 @@
 
 		// On | Off ************************************************
 		on: function(eventname, callback) {
-			var eventConfig, location,
-				cacheConfig = this._cache[eventname];
-
-			if (cacheConfig) {
-				eventConfig = cacheConfig;
-				location = this._getEventLocation(eventConfig);
-			} else {
-				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
-				location = this._getEventLocation(eventConfig);
-			}
+			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname)),
+				location = this._evtLookup(eventConfig);
 
 			location.push(callback);
 
@@ -193,14 +193,7 @@
 		bind: function() { this.on.apply(this, arguments); },
 
 		off: function(eventname) {
-			var eventConfig,
-				cacheConfig = this._cache[eventname];
-
-			if (cacheConfig) {
-				eventConfig = cacheConfig;
-			} else {
-				eventConfig = this._cache[eventname] = this._parseConfig(eventname);
-			}
+			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
 
 			if (eventConfig.evt === '') { // Removing a namespace
 
@@ -288,19 +281,6 @@
 				if (!evt) { continue; }
 				if (evt.apply(null, args) === false) { return; }
 			}
-		},
-
-		_parseConfig: function(eventname) {
-			var match = _NAME_REGEX.exec(eventname);
-			return {
-				// [0] : the entire match, don't care!
-				// [1] : handle
-				handle:    (match[1] === undefined) ? '' : match[1],
-				// [2] : event
-				evt:       (match[2] === undefined) ? '' : match[2],
-				// [3] : namespace
-				namespace: (match[3] === undefined) ? '' : match[3]
-			};
 		},
 
 		_getEventLocation: function(eventConfig, location) {
