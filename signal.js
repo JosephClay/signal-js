@@ -173,6 +173,7 @@
 		// Disable | Enable *************************************
 		disable: function(handle) {
 			this._inactive = this._inactive || {};
+
 			this._inactive[handle] = this._inactive[handle] || {};
 			this._inactive[handle] = _extend({}, this._active[handle]);
 			delete this._active[handle];
@@ -182,6 +183,7 @@
 
 		enable: function(handle) {
 			this._inactive = this._inactive || {};
+
 			this._active[handle] = this._active[handle] || {};
 			this._active[handle] = _extend({}, this._inactive[handle]);
 			delete this._inactive[handle];
