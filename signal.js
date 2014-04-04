@@ -35,7 +35,10 @@
 		 * Unique Id
 		 * @type {Number}
 		 */
-		_subid = 0;
+		_id = 0,
+		_uniqueId = function() {
+			return _id++;
+		},
 
 		/**
 		 * Holds cached, parsed event keys by string
@@ -111,7 +114,7 @@
 		subscribe: function(name, func) {
 			this._subscriptions = this._subscriptions || {};
 
-			var id = this._uniqueSubId(),
+			var id = _uniqueId(),
 				location = this._subscriptions[name] || (this._subscriptions[name] = []);
 
 			func.__subid__ = id;
