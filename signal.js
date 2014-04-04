@@ -82,7 +82,7 @@
 		 * Holds subscriptions - lazy creation
 		 * @type {Object}
 		 */
-		// this._subscriptions;
+		// this._subs;
 	};
 
 	_extend(Signal, {
@@ -135,10 +135,10 @@
 		constructor: Signal,
 
 		subscribe: function(name, func) {
-			this._subscriptions = this._subscriptions || {};
+			this._subs = this._subs || {};
 
 			var id = _uniqueId(),
-				location = this._subscriptions[name] || (this._subscriptions[name] = []);
+				location = this._subs[name] || (this._subs[name] = []);
 
 			func.__subid__ = id;
 			location.push(func);
@@ -147,9 +147,9 @@
 		},
 
 		unsubscribe: function(name, id) {
-			this._subscriptions = this._subscriptions || {};
+			this._subs = this._subs || {};
 
-			var location = this._subscriptions[name];
+			var location = this._subs[name];
 			if (!location) { return; }
 
 			var idx = 0, length = location.length;
@@ -164,11 +164,11 @@
 		},
 
 		dispatch: function() {
-			this._subscriptions = this._subscriptions || {};
+			this._subs = this._subs || {};
 
 			var args = arguments,
 				name = _ripFirstArg(args),
-				location = this._subscriptions[name] || (this._subscriptions[name] = []),
+				location = this._subs[name] || (this._subs[name] = []),
 				idx = 0, length = location.length,
 				func;
 			for (; idx < length; idx++) {
