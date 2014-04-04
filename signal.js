@@ -265,6 +265,9 @@
 			var args = arguments,
 				eventname = _ripFirstArg(args),
 				eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname)),
+				// Always do an event lookup. This ensures that the location
+				// of the event has been created so that calls to trigger
+				// for events that haven't been registered don't throw exceptions
 				location = this._evtLookup(eventConfig);
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
