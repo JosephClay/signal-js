@@ -62,6 +62,12 @@
 				// [3] : namespace
 				namespace: (match[3] === undefined) ? '' : match[3]
 			};
+		},
+
+		_reassignEvents = function(handle, active, inactive) {
+			inactive[handle] = inactive[handle] || {};
+			inactive[handle] = _extend({}, active[handle]);
+			delete active[handle];
 		};
 
 
@@ -181,10 +187,8 @@
 		disable: function(handle) {
 			var active = this._active,
 				inactive = this._inactive || (this._inactive = {});
-
-			inactive[handle] = inactive[handle] || {};
-			inactive[handle] = _extend({}, active[handle]);
-			delete active[handle];
+			
+			_reassignEvents(handle, active, inactive);
 
 			return this;
 		},
@@ -192,10 +196,8 @@
 		enable: function(handle) {
 			var active = this._active,
 				inactive = this._inactive || (this._inactive = {});
-
-			active[handle] = active[handle] || {};
-			active[handle] = _extend({}, inactive[handle]);
-			delete inactive[handle];
+			
+			_reassignEvents(handle, inactive, active);
 
 			return this;
 		},
