@@ -68,6 +68,18 @@
 			inactive[handle] = inactive[handle] || {};
 			inactive[handle] = _extend({}, active[handle]);
 			delete active[handle];
+		},
+
+		_callEvents = function(events, args) {
+			args = args || [];
+
+			var idx = 0, length = events.length,
+				evt;
+			for (; idx < length; idx += 1) {
+				evt = events[idx];
+				if (!evt) { continue; }
+				if (evt.apply(null, args) === false) { return; }
+			}
 		};
 
 
@@ -272,14 +284,14 @@
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
 				
-				this._callEvts(location, args);
+				_callEvents(location, args);
 
 			} else { // Else, trigger everything registered to the event
 				
 				var subSignal = this._active[eventConfig.handle][eventConfig.evt],
 					key;
 				for (key in subSignal) {
-					this._callEvts(subSignal[key], args);
+					_callEvents(subSignal[key], args);
 				}
 
 			}
@@ -298,18 +310,6 @@
 		},
 
 		// Private *************************************************
-		_callEvts: function(events, args) {
-			args = args || [];
-
-			var idx = 0, length = events.length,
-				evt;
-			for (; idx < length; idx += 1) {
-				evt = events[idx];
-				if (!evt) { continue; }
-				if (evt.apply(null, args) === false) { return; }
-			}
-		},
-
 		_evtLookup: function(eventConfig, location) {
 			location = location || this._active;
 
