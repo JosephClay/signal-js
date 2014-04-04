@@ -204,10 +204,9 @@
 
 		// On | Off ************************************************
 		on: function(eventname, callback) {
-			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname)),
-				location = this._evtLookup(eventConfig);
-
-			location.push(callback);
+			var eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
+			
+			this._evtLookup(eventConfig).push(callback);
 
 			return this;
 		},
