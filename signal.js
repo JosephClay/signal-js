@@ -7,10 +7,12 @@
 	var _NAME_REGEX = /(?:([\w-]+):)?([\w-]*)(?:.([\w-]+))?/,
 		/**
 		 * Quick reference to Array.prototype.splice
-		 * for duplicating arrays
+		 * for duplicating arrays (while removing the 
+		 * first parameter ala trigger)
 		 * @type {Function}
 		 */
-		_splicer = ([]).splice,
+	var _splicer = [].splice,
+		
 		/**
 		 * Object merger
 		 * @param {Objects}
