@@ -8,7 +8,7 @@
 		 */
 	var _ripFirstArg = (function(splice) {
 			return function(arr) {
-				return spice.call(arr, 0, 1)[0];
+				return splice.call(arr, 0, 1)[0];
 			};
 		}([].splice)),
 		
