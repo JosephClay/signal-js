@@ -277,10 +277,6 @@
 			return this;
 		},
 
-		/* Private *************************************************/
-		_uniqueSubId: function() {
-			return 's' + _subid++;
-		},
 
 		_callEventArray: function(events, args) {
 			args = args || [];
