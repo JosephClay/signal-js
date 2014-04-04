@@ -3,10 +3,14 @@
 		/**
 		 * Quick reference to Array.prototype.splice
 		 * for duplicating arrays (while removing the 
-		 * first parameter ala trigger)
+		 * first parameter)
 		 * @type {Function}
 		 */
-	var _splicer = [].splice,
+	var _ripFirstArg = (function(splice) {
+			return function(arr) {
+				return spice.call(arr, 0, 1)[0];
+			};
+		}([].splice)),
 		
 		/**
 		 * Object merger
@@ -160,7 +164,7 @@
 			this._subscriptions = this._subscriptions || {};
 
 			var args = arguments,
-				name = _splicer.call(args, 0, 1)[0],
+				name = _ripFirstArg(args),
 				location = this._subscriptions[name] || (this._subscriptions[name] = []),
 				idx = 0, length = location.length,
 				func;
@@ -252,7 +256,7 @@
 		// Trigger ************************************************
 		trigger: function() {
 			var args = arguments,
-				eventname = _splicer.call(args, 0, 1)[0],
+				eventname = _ripFirstArg(args),
 				eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname)),
 				location = this._evtLookup(eventConfig);
 
