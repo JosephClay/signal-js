@@ -219,9 +219,13 @@
 				}
 
 			} else if (eventConfig.namespace !== '') { // Has a namespace
+				
 				this._active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
+
 			} else { // Does not have a namespace
+				
 				this._active[eventConfig.handle][eventConfig.evt] = { '': [] };
+
 			}
 
 			return this;
@@ -230,8 +234,8 @@
 
 		// Based on underscore's once implementation
 		once: function(eventname, callback) {
-			var hasRan = false, memo;
-
+			var hasRan = false,
+				memo;
 			return this.on(eventname, function() {
 				return function() {
 					if (hasRan) { return memo; }
@@ -253,13 +257,17 @@
 				location = this._evtLookup(eventConfig);
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
+				
 				this._callEvts(location, args);
+
 			} else { // Else, trigger everything registered to the event
+				
 				var subSignal = this._active[eventConfig.handle][eventConfig.evt],
 					key;
 				for (key in subSignal) {
 					this._callEvts(subSignal[key], args);
 				}
+
 			}
 
 			return this;
