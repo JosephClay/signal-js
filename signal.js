@@ -2,7 +2,7 @@
 
 		/**
 		 * Quick reference to Array.prototype.splice
-		 * for duplicating arrays (while removing the 
+		 * for duplicating arrays (while removing the
 		 * first parameter)
 		 * @type {Function}
 		 */
@@ -11,7 +11,7 @@
 				return splice.call(arr, 0, 1)[0];
 			};
 		}([].splice)),
-		
+
 		/**
 		 * Object merger
 		 * @param {Objects}
@@ -207,7 +207,7 @@
 		disable: function(handle) {
 			var active = this._active,
 				inactive = this._inactive || (this._inactive = {});
-			
+
 			_reassignEvents(handle, active, inactive);
 
 			return this;
@@ -216,7 +216,7 @@
 		enable: function(handle) {
 			var active = this._active,
 				inactive = this._inactive || (this._inactive = {});
-			
+
 			_reassignEvents(handle, inactive, active);
 
 			return this;
@@ -250,11 +250,11 @@
 				}
 
 			} else if (eventConfig.namespace !== '') { // Has a namespace
-				
+
 				active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
 
 			} else { // Does not have a namespace
-				
+
 				active[eventConfig.handle][eventConfig.evt] = { '': [] };
 
 			}
@@ -292,11 +292,11 @@
 				location = _eventLookup(eventConfig, active);
 
 			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
-				
+
 				_callEvents(location, args);
 
 			} else { // Else, trigger everything registered to the event
-				
+
 				var subSignal = active[eventConfig.handle][eventConfig.evt],
 					key;
 				for (key in subSignal) {
