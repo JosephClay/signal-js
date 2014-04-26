@@ -268,15 +268,13 @@
 			var hasRan = false,
 				memo;
 			return this.on(eventname, function() {
-				return function() {
-					if (hasRan) { return memo; }
-					hasRan = true;
+				if (hasRan) { return memo; }
+				hasRan = true;
 
-					memo = callback.apply(this, arguments);
-					callback = null;
+				memo = callback.apply(this, arguments);
+				callback = null;
 
-					return memo;
-				};
+				return memo;
 			});
 		},
 
