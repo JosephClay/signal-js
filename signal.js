@@ -251,11 +251,19 @@
 
 			} else if (eventConfig.namespace !== '') { // Has a namespace
 
-				active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
+				if (active[eventConfig.handle] &&
+					active[eventConfig.handle][eventConfig.evt] &&
+						active[eventConfig.handle][eventConfig.evt][eventConfig.namespace]) {
+
+					active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
+				
+				}
 
 			} else { // Does not have a namespace
 
-				active[eventConfig.handle][eventConfig.evt] = { '': [] };
+				if (active[eventConfig.handle]) {
+					active[eventConfig.handle][eventConfig.evt] = { '': [] };
+				}
 
 			}
 
