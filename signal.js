@@ -56,11 +56,11 @@
 			return {
 				// [0] : the entire match, don't care!
 				// [1] : handle
-				handle:    (match[1] === undefined) ? '' : match[1],
+				h:  (match[1] === undefined) ? '' : match[1],
 				// [2] : event
-				evt:       (match[2] === undefined) ? '' : match[2],
+				e:  (match[2] === undefined) ? '' : match[2],
 				// [3] : namespace
-				namespace: (match[3] === undefined) ? '' : match[3]
+				ns: (match[3] === undefined) ? '' : match[3]
 			};
 		},
 
@@ -83,9 +83,9 @@
 		},
 
 		_eventLookup = function(eventConfig, location) {
-			var handle    = location[eventConfig.handle] || (location[eventConfig.handle] = {}),
-				evt       = handle[eventConfig.evt]      || (handle[eventConfig.evt]      = {}),
-				namespace = evt[eventConfig.namespace]   || (evt[eventConfig.namespace]   = []);
+			var handle    = location[eventConfig.h] || (location[eventConfig.h] = {}),
+				evt       = handle[eventConfig.e]   || (handle[eventConfig.e]   = {}),
+				namespace = evt[eventConfig.ns]     || (evt[eventConfig.ns]     = []);
 
 			return namespace;
 		};
@@ -236,33 +236,33 @@
 			var active = this._active,
 				eventConfig = _cache[eventname] || (_cache[eventname] = _parseConfig(eventname));
 
-			if (eventConfig.evt === '') { // Removing a namespace
+			if (eventConfig.e === '') { // Removing a namespace
 
-				var events = active[eventConfig.handle],
+				var events = active[eventConfig.h],
 					eventName,
 					namespaceName;
 				for (eventName in events) {
 					for (namespaceName in events[eventName]) {
-						if (namespaceName === eventConfig.namespace) {
-							active[eventConfig.handle][eventName][namespaceName].length = 0;
+						if (namespaceName === eventConfig.ns) {
+							active[eventConfig.h][eventName][namespaceName].length = 0;
 						}
 					}
 				}
 
-			} else if (eventConfig.namespace !== '') { // Has a namespace
+			} else if (eventConfig.ns !== '') { // Has a namespace
 
-				if (active[eventConfig.handle] &&
-					active[eventConfig.handle][eventConfig.evt] &&
-						active[eventConfig.handle][eventConfig.evt][eventConfig.namespace]) {
+				if (active[eventConfig.h] &&
+					active[eventConfig.h][eventConfig.e] &&
+						active[eventConfig.h][eventConfig.e][eventConfig.ns]) {
 
-					active[eventConfig.handle][eventConfig.evt][eventConfig.namespace].length = 0;
+					active[eventConfig.h][eventConfig.e][eventConfig.ns].length = 0;
 				
 				}
 
 			} else { // Does not have a namespace
 
-				if (active[eventConfig.handle]) {
-					active[eventConfig.handle][eventConfig.evt] = { '': [] };
+				if (active[eventConfig.h]) {
+					active[eventConfig.h][eventConfig.e] = { '': [] };
 				}
 
 			}
@@ -297,13 +297,13 @@
 				// for events that haven't been registered don't throw exceptions
 				location = _eventLookup(eventConfig, active);
 
-			if (eventConfig.namespace !== '') { // If there's a namespace, trigger only that array
+			if (eventConfig.ns !== '') { // If there's a namespace, trigger only that array
 
 				_callEvents(location, args);
 
 			} else { // Else, trigger everything registered to the event
 
-				var subSignal = active[eventConfig.handle][eventConfig.evt],
+				var subSignal = active[eventConfig.h][eventConfig.e],
 					key;
 				for (key in subSignal) {
 					_callEvents(subSignal[key], args);
