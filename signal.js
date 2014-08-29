@@ -75,10 +75,10 @@
 			};
 		},
 
-		_reassignEvents = function(handle, active, inactive) {
-			inactive[handle] = inactive[handle] || {};
-			inactive[handle] = _extend({}, active[handle]);
-			delete active[handle];
+		_reassignEvents = function(handle, first, second) {
+			second[handle] = second[handle] || {};
+			_extend(second[handle], first[handle]);
+			delete first[handle];
 		},
 
 		_callEvents = function(events, args) {
