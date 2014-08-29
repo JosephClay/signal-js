@@ -5,6 +5,7 @@
   "version": "0.0.2",
   "homepage": "https://github.com/JosephClay/signal",
   "license": "MIT",
+  "main": "signal.js",
   "author": {
     "name": "Joe Clay",
     "email": "testingriven@gmail.com"
