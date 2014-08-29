@@ -102,7 +102,7 @@
 		};
 
 
-	var Signal = function() {
+	function Signal() {
 		/**
 		 * Holds active events by handle + event + namespace
 		 * @type {Object}
