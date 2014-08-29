@@ -101,6 +101,38 @@
 			return namespace;
 		};
 
+	/**
+	 * Klass-like extend method
+	 * @param  {Function} constructor
+	 * @param  {Object} extension   prototype extension
+	 * @return {Function} constructor
+	 */
+	var klassExtend = function(constructor, extension) {
+		var hasConstructor = (typeof constructor === 'function');
+		if (!hasConstructor) { extension = constructor; }
+
+		var fn = function() {
+				var ret = Signal.apply(this, arguments);
+				if (hasConstructor) {
+					ret = constructor.apply(this, arguments);
+				}
+				return ret;
+			};
+
+		// Add properties to the object
+		_extend(fn, Signal);
+
+		// Duplicate the prototype
+		var NoOp = function() {};
+		NoOp.prototype = Signal.prototype;
+		fn.prototype = new NoOp();
+
+		// Merge the prototypes
+		_extend(fn.prototype, Signal.prototype, extension);
+		fn.prototype.constructor = constructor || fn;
+
+		return fn;
+	};
 
 	function Signal() {
 		/**
@@ -120,56 +152,23 @@
 		 * @type {Object}
 		 */
 		// this._subs;
-	};
+	}
 
-	_extend(Signal, {
-
-		/**
-		 * Returns a new Signal instance
-		 * @return {Signal}
-		 */
-		construct: function() {
-			return new Signal();
-		},
-
-		/**
-		 * Klass extend method
-		 * @param  {Function} constructor
-		 * @param  {Object} extension   prototype extension
-		 * @return {Function} constructor
-		 */
-		extend: function(constructor, extension) {
-			var hasConstructor = (typeof constructor === 'function');
-			if (!hasConstructor) { extension = constructor; }
-
-			var self = this,
-				fn = function() {
-					var ret = self.apply(this, arguments);
-					if (hasConstructor) {
-						ret = constructor.apply(this, arguments);
-					}
-					return ret;
-				};
-
-			// Add properties to the object
-			_extend(fn, this);
-
-			// Duplicate the prototype
-			var NoOp = function() {};
-			NoOp.prototype = this.prototype;
-			fn.prototype = new NoOp();
-
-			// Merge the prototypes
-			_extend(fn.prototype, this.prototype, extension);
-			fn.prototype.constructor = constructor || fn;
-
-			return fn;
-		}
-	});
+	Signal.extend = klassExtend;
 
 	Signal.prototype = {
 
 		constructor: Signal,
+
+		/**
+		 * Returns a new signal instance
+		 * @return {signal}
+		 */
+		construct: function() {
+			var signal = new Signal();
+			singal.extend = klassExtend;
+			return signal;
+		},
 
 		subscribe: function(name, func) {
 			var subscriptions = this._subs || (this._subs = {});
@@ -267,7 +266,7 @@
 						active[eventConfig.h][eventConfig.e][eventConfig.ns]) {
 
 					active[eventConfig.h][eventConfig.e][eventConfig.ns].length = 0;
-				
+
 				}
 
 			} else { // Does not have a namespace
@@ -336,17 +335,15 @@
 		}
 	};
 
-	// Create a pub/sub to expose Signal as
-	// e.g. Signal.on(), Signal.trigger()
-	var pubSub = new Signal();
+	// Create a pub/sub to expose signal as
+	// e.g. signal.on(), signal.trigger()
+	var signal = new Signal();
 
-	// Attach the Signal object as a property
-	// of the exposed object so that new instances
-	// can be constructed/extended
-	// e.g. Signal.core.construct(), Signal.core.extend({})
-	pubSub.core = Signal;
+	// setup extension method
+	signal.extend = klassExtend;
 
 	// Expose
-	root.Signal = pubSub;
+	return signal;
+
 
 }(this));
