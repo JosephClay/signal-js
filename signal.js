@@ -1,4 +1,14 @@
-(function(root, undefined) {
+(function(name, definition) {
+
+    if (typeof define === 'function') { // RequireJS
+        define(function() { return definition; });
+    } else if (typeof module !== 'undefined' && module.exports) { // CommonJS
+        module.exports = definition;
+    } else { // Browser
+        this[name] = definition;
+    }
+
+})('signal', function(root, undefined) {
 
 		/**
 		 * Quick reference to Array.prototype.splice
