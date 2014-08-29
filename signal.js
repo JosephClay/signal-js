@@ -27,9 +27,8 @@
 		 * @param {Objects}
 		 * @return {Object}
 		 */
-		_extend = function() {
+		_extend = function(base) {
 			var args = arguments,
-				base = args[0],
 				idx = 1, length = args.length,
 				key, merger;
 			for (; idx < length; idx += 1) {
@@ -39,6 +38,8 @@
 					base[key] = merger[key];
 				}
 			}
+
+			return base;
 		},
 
 		/**
