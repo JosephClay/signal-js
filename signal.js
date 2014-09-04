@@ -166,7 +166,7 @@
 		 */
 		construct: function() {
 			var signal = new Signal();
-			singal.extend = klassExtend;
+			signal.extend = klassExtend;
 			return signal;
 		},
 
