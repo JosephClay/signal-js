@@ -24,7 +24,7 @@
 			var args = arguments,
 				idx = 1, length = args.length,
 				key, merger;
-			for (; idx < length; idx += 1) {
+			for (; idx < length; idx++) {
 				merger = args[idx];
 
 				for (key in merger) {
@@ -172,7 +172,7 @@
 			var id = _uniqueId(),
 				location = subscriptions[name] || (subscriptions[name] = []);
 
-			func.__subid__ = id;
+			func.__signal_id__ = id;
 			location.push(func);
 
 			return id;
@@ -186,7 +186,7 @@
 
 			var idx = 0, length = location.length;
 			for (; idx < length; idx += 1) {
-				if (location[idx].__subid__ === id) {
+				if (location[idx].__signal_id__ === id) {
 					location.splice(idx, 1);
 					return true;
 				}
