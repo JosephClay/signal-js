@@ -134,6 +134,12 @@
 		return fn;
 	};
 
+	var create = function() {
+		var signal = new Signal();
+		signal.extend = klassExtend;
+		return signal;
+	};
+
 	function Signal() {
 		/**
 		 * Holds active events by handle + event + namespace
@@ -164,11 +170,8 @@
 		 * Returns a new signal instance
 		 * @return {signal}
 		 */
-		construct: function() {
-			var signal = new Signal();
-			signal.extend = klassExtend;
-			return signal;
-		},
+		construct: create,
+		create: create,
 
 		subscribe: function(name, func) {
 			var subscriptions = this._subs || (this._subs = {});
