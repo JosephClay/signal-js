@@ -1,4 +1,5 @@
 var gulp       = require('gulp'),
+    fs         = require('fs'),
     moment     = require('moment'),
     uglify     = require('gulp-uglify'),
     gzip       = require('gulp-gzip'),
@@ -47,6 +48,10 @@ gulp.task('zip', function() {
 });
 
 gulp.task('banner', function() {
+    var file = fs.readFileSync('./signal.min.js').toString();
+    file = file.replace(/^\/\*(.|\n)+\*\//, '');
+    fs.writeFileSync('./signal.min.js', file);
+
     var banner = [
         '/*! ${title} - v${version} - ${date} %>\n',
         ' * ${homepage}\n',
