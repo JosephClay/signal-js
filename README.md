@@ -1,6 +1,8 @@
 ## signal
 A small (~1KB Minified and GZipped) and fast JavaScript event system. Great as a pubsub or to add event emitters to your code.
 
+`npm install signal-js`
+
 ## How to use
 Bind a function in a jquery-like fashion to Singal using `on` or `bind`.
 ```javascript
