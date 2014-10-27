@@ -78,11 +78,27 @@
 			args = args || [];
 
 			var idx = 0, length = events.length,
-				evt;
+				evt, params;
 			for (; idx < length; idx += 1) {
 				evt = events[idx];
 				if (!evt) { continue; }
-				if (evt.apply(null, args) === false) { return; }
+
+				params = evt.length;
+				if (params === 1) {
+					if (evt(args[0]) === false) { return; }
+					continue;
+				}
+				if (params === 2) {
+					if (evt(args[0], args[1]) === false) { return; }
+					continue;
+				}
+				if (params === 3) {
+					if (evt(args[0], args[1], args[2]) === false) { return; }
+					continue;
+				}
+				if (evt.apply(null, args) === false) {
+					return;
+				}
 			}
 		},
 

@@ -1,5 +1,5 @@
 ## signal
-A small (2.58KB minified, 1.05KB gzipped) and fast JavaScript event system with no dependencies. Great as a pubsub or to add event emitters to your code.
+A small (2.7KB minified, 1KB gzipped) and fast JavaScript event system with no dependencies. Great as a pubsub or to add event emitters to your code.
 
 `npm install signal-js`
 
