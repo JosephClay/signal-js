@@ -67,10 +67,34 @@ gulp.task('banner', function() {
 
 });
 
+
 gulp.task('default', function() {
     gulp.start([
         'min',
         'zip',
         'banner'
     ]);
+});
+
+gulp.task('test', function() {
+    var path = require('path'),
+        nodeunit = require('nodeunit').reporters.default,
+        dir = require('node-dir');
+
+    var normalizeFilePaths = function(files) {
+        return files.map(function(file) {
+            var normalPath = path.normalize(path.relative(__dirname, file)),
+                properPath = normalPath.split(path.sep).join('/'),
+                relativePath = './' + properPath;
+            return relativePath;
+        });
+    };
+
+    dir.files('./test', function(err, files) {
+        if (err) { throw err; }
+
+        files = normalizeFilePaths(files);
+        nodeunit.run(files);
+    });
+
 });

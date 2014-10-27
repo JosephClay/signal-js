@@ -1,39 +1,46 @@
-$(function() {
+var _ = require('underscore'),
+	signal = require('../signal');
 
-	module('Subscription');
-	test('Registration', function() {
-		var hasTriggered = false,
-			id = signal.subscribe('foo', function() { hasTriggered = true; });
-		ok(_.isNumber(id), 'Events can subscribe');
+exports['Subscription: Registration'] = function(test) {
+	test.expect(3);
 
-		signal.dispatch('foo');
-		ok(hasTriggered, 'Events can dispatch');
+	var hasTriggered = false,
+		id = signal.subscribe('foo', function() { hasTriggered = true; });
+	test.ok(_.isNumber(id), 'Events can subscribe');
 
-		hasTriggered = false;
-		signal.unsubscribe('foo', id);
-		signal.dispatch('foo');
-		ok(!hasTriggered, 'Events can unsubscribe');
-	});
+	signal.dispatch('foo');
+	test.ok(hasTriggered, 'Events can dispatch');
 
-	test('Multi Registration', function() {
-		var hasOneTriggered = false,
-			hasTwoTriggered = false,
-			hasThreeTriggered = false;
+	hasTriggered = false;
+	signal.unsubscribe('foo', id);
+	signal.dispatch('foo');
+	test.ok(!hasTriggered, 'Events can unsubscribe');
 
-		var oneId = signal.subscribe('bar', function() { hasOneTriggered = true; }),
-			twoId = signal.subscribe('bar', function() { hasTwoTriggered = true; }),
-			threeId = signal.subscribe('bar', function() { hasThreeTriggered = true; });
+	test.done();
+};
 
-		signal.dispatch('bar');
-		ok(hasOneTriggered && hasTwoTriggered && hasThreeTriggered, 'Can dispatch multiple functions under one name');
+exports['Subscription: Multi Registration'] = function(test) {
+	test.expect(2);
 
-		hasOneTriggered = false;
-		hasTwoTriggered = false;
+	var hasOneTriggered = false,
+		hasTwoTriggered = false,
 		hasThreeTriggered = false;
 
-		signal.unsubscribe('bar', twoId);
-		signal.dispatch('bar');
+	var oneId = signal.subscribe('bar', function() { hasOneTriggered = true; }),
+		twoId = signal.subscribe('bar', function() { hasTwoTriggered = true; }),
+		threeId = signal.subscribe('bar', function() { hasThreeTriggered = true; });
 
-		ok(hasOneTriggered && !hasTwoTriggered && hasThreeTriggered, 'Can unsubscribe single function, keeping others intact');
-	});
-});
+	signal.dispatch('bar');
+	test.ok(hasOneTriggered && hasTwoTriggered && hasThreeTriggered, 'Can dispatch multiple functions under one name');
+
+	hasOneTriggered = false;
+	hasTwoTriggered = false;
+	hasThreeTriggered = false;
+
+	signal.unsubscribe('bar', twoId);
+	signal.dispatch('bar');
+
+	test.ok(hasOneTriggered && !hasTwoTriggered && hasThreeTriggered, 'Can unsubscribe single function, keeping others intact');
+
+	test.done();
+};
