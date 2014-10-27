@@ -4,8 +4,10 @@ A small (2.7KB minified, 1KB gzipped) and fast JavaScript event system with no d
 `npm install signal-js`
 
 ## How to use
-Bind a function in a jquery-like fashion to Singal using `on` or `bind`.
+Bind a function in a jquery-like fashion to signal using `on` or `bind`.
 ```javascript
+var signal = require('signal-js');
+
 signal.on('basic', function(arg) {
 	console.log('args: ', arg);
 });
