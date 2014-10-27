@@ -8,19 +8,12 @@
         this[name] = definition;
     }
 
-})('signal', function(root, undefined) {
+})('signal', function(undefined) {
 
-		/**
-		 * Quick reference to Array.prototype.splice
-		 * for duplicating arrays (while removing the
-		 * first parameter)
-		 * @type {Function}
-		 */
-	var _ripFirstArg = (function(splice) {
-			return function(arr) {
-				return splice.call(arr, 0, 1)[0];
-			};
-		}([].splice)),
+	var _splice = [].splice,
+		_ripFirstArg = function(arr) {
+			return _splice.call(arr, 0, 1)[0];
+		},
 
 		/**
 		 * Object merger
@@ -348,5 +341,4 @@
 	// Expose
 	return signal;
 
-
-}(this));
+}());
