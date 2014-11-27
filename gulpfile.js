@@ -1,10 +1,13 @@
 var gulp       = require('gulp'),
     fs         = require('fs'),
+    browserify = require('browserify'),
     moment     = require('moment'),
     uglify     = require('gulp-uglify'),
     gzip       = require('gulp-gzip'),
-    rename     = require('gulp-rename'),
     header     = require('gulp-header'),
+    buffer     = require('vinyl-buffer'),
+    collapse   = require('bundle-collapser/plugin'),
+    source     = require('vinyl-source-stream'),
     pkg        = require('./package.json'),
     UGLIFY_OPTS = {
         fromString: true,
@@ -34,50 +37,65 @@ var gulp       = require('gulp'),
         }
     };
 
-gulp.task('min', function() {
-    gulp.src('signal.js')
-        .pipe(uglify(UGLIFY_OPTS))
-        .pipe(rename('signal.min.js'))
-        .pipe(gulp.dest('./'));
-});
-
-gulp.task('zip', function() {
-    gulp.src('signal.min.js')
-        .pipe(gzip({ append: true }))
-        .pipe(gulp.dest('./'));
-});
-
-gulp.task('banner', function() {
-    var file = fs.readFileSync('./signal.min.js').toString();
-    file = file.replace(/^\/\*(.|\n)+\*\//, '');
-    fs.writeFileSync('./signal.min.js', file);
-
-    var banner = [
+var banner = function() {
+    var head = [
         '/*! ${title} - v${version} - ${date} %>\n',
         ' * ${homepage}\n',
         ' * Copyright (c) 2013-${year} ${author}; License: ${license} */\n'
     ].join('');
 
-    gulp.src('signal.min.js')
-        .pipe(header(banner, {
-            title:    pkg.title || pkg.name,
-            version:  pkg.version,
-            date:     moment().format('YYYY-MM-DD'),
-            homepage: pkg.homepage,
-            author:   pkg.author.name,
-            year:     moment().format('YYYY'),
-            license:  pkg.license
-        }))
-        .pipe(gulp.dest('./'));
+    return header(head, {
+        title:    pkg.title || pkg.name,
+        version:  pkg.version,
+        date:     moment().format('YYYY-MM-DD'),
+        homepage: pkg.homepage,
+        author:   pkg.author.name,
+        year:     moment().format('YYYY'),
+        license:  pkg.license
+    });
+};
 
+var build = function() {
+    return browserify('./src/index.js', {
+            standalone: 'signal',
+            debug: false
+        })
+        .plugin(collapse)
+        .bundle();
+};
+
+var min = function() {
+    return build()
+        .pipe(source('signal.min.js'));
+};
+
+gulp.task('build', function() {
+    build()
+        .pipe(source('signal.js'))
+        .pipe(buffer())
+        .pipe(banner())
+        .pipe(gulp.dest('./'));
 });
 
+gulp.task('min', function() {
+    min()
+        .pipe(buffer())
+        .pipe(uglify(UGLIFY_OPTS))
+        .pipe(banner())
+        .pipe(gulp.dest('./'));
+});
 
-gulp.task('default', function() {
+gulp.task('zip', function() {
+    min()
+        .pipe(gzip({ append: true }))
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('release', function() {
     gulp.start([
+        'build',
         'min',
-        'zip',
-        'banner'
+        'zip'
     ]);
 });
 
@@ -101,5 +119,4 @@ gulp.task('test', function() {
         files = normalizeFilePaths(files);
         nodeunit.run(files);
     });
-
 });

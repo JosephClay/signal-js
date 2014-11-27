@@ -1,5 +1,5 @@
 var _ = require('underscore'),
-    signal = require('../signal');
+    signal = require('../src');
 
 exports['Event: Registration'] = function(test) {
 	test.expect(8);
