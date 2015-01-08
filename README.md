@@ -1,4 +1,6 @@
 ## signal
+
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JosephClay/signal-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 A small (3.3KB minified, 2.6KB gzipped) and fast JavaScript event system with no dependencies. Great as a pubsub or to add event emitters to your code.
 
 `npm install signal-js`
