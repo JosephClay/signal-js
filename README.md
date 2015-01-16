@@ -132,11 +132,9 @@ signal.dispatch('tick', Date.now());
 signal.unsubscribe('tick', id);
 ```
 
-## Create/Construct
+## Create
 ```javascript
-var pubSub = signal.create();
-// or
-var pubSub = signal.construct();
+var pubSub = signal();
 ```
 
 ## Extend
