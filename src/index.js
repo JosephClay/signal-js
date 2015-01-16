@@ -336,7 +336,6 @@ var signal = _extend(create, create());
 signal.prototype = Signal.prototype;
 
 // setup create methods
-signal.construct = create;
 signal.create = create;
 
 // setup extension method
