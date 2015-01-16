@@ -1,7 +1,7 @@
 var _ = require('underscore'),
 	signal = require('../src');
 
-exports['Subscription: Registration'] = function(test) {
+exports['subscription: registration'] = function(test) {
 	test.expect(3);
 
 	var hasTriggered = false,
@@ -19,7 +19,7 @@ exports['Subscription: Registration'] = function(test) {
 	test.done();
 };
 
-exports['Subscription: Multi Registration'] = function(test) {
+exports['subscription: multi registration'] = function(test) {
 	test.expect(2);
 
 	var hasOneTriggered = false,

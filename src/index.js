@@ -132,12 +132,6 @@ var klassExtend = function(constructor, extension) {
 	return fn;
 };
 
-var create = function() {
-	var signal = new Signal();
-	signal.extend = klassExtend;
-	return signal;
-};
-
 function Signal() {
 	/**
 	 * Holds active events by handle + event + namespace
@@ -163,13 +157,6 @@ Signal.extend = klassExtend;
 Signal.prototype = {
 
 	constructor: Signal,
-
-	/**
-	 * Returns a new signal instance
-	 * @return {signal}
-	 */
-	construct: create,
-	create: create,
 
 	subscribe: function(name, func) {
 		var subscriptions = this._subs || (this._subs = {});
@@ -336,9 +323,21 @@ Signal.prototype = {
 	}
 };
 
+var create = function() {
+	var s = new Signal();
+	s.prototype = Signal.prototype;
+	s.extend = klassExtend;
+	return s;
+};
+
 // Create a pub/sub to expose signal as
 // e.g. signal.on(), signal.trigger()
-var signal = new Signal();
+var signal = _extend(create, create());
+signal.prototype = Signal.prototype;
+
+// setup create methods
+signal.construct = create;
+signal.create = create;
 
 // setup extension method
 signal.extend = klassExtend;

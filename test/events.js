@@ -1,7 +1,7 @@
 var _ = require('underscore'),
     signal = require('../src');
 
-exports['Event: Registration'] = function(test) {
+exports['event: registration'] = function(test) {
 	test.expect(8);
 
 	var hasTriggered = false,
@@ -34,7 +34,7 @@ exports['Event: Registration'] = function(test) {
 	test.done();
 };
 
-exports['Event: Params'] = function(test) {
+exports['event: params'] = function(test) {
 	test.expect(10);
 
 	var has1, has2, has3, has4, has5, has6, has7, has8, has9;
@@ -70,7 +70,7 @@ exports['Event: Params'] = function(test) {
 	test.done();
 };
 
-exports['Event: Handles'] = function(test) {
+exports['event: handles'] = function(test) {
 	test.expect(2);
 
 	var hasTriggered = false;

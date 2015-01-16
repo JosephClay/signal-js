@@ -1,7 +1,7 @@
 var _ = require('underscore'),
     signal = require('../src');
 
-exports.Extend = function(test) {
+exports.extend = function(test) {
     test.expect(7);
 
     var CustomConstructor = signal.extend(function(arg) {
