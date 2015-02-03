@@ -34,12 +34,8 @@ var callers = {
 
 module.exports = {
     create: function(args) {
-        var len = args.length;
-
-        // no args is easy
-        if (len === 0) { return noArgs; }
-
-        var caller = callers[len] || apply;
+        var length = args.length,
+            caller = callers[length] || apply;
         return caller(args);
     },
     

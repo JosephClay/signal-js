@@ -9,7 +9,7 @@ module.exports = {
 			registration = signal.on('foo:bar.baz', function() { hasTriggered = true; });
 		test.ok(_.isObject(registration), 'Events can register');
 
-		test.ok(signal._active['foo:bar'].baz, 'events can be retrieved');
+		test.ok(signal._events['foo:bar'].baz, 'events can be retrieved');
 
 		signal.trigger('foo:bar.baz');
 		test.ok(hasTriggered, 'Events can trigger');
@@ -20,7 +20,7 @@ module.exports = {
 		test.ok(!hasTriggered, 'Events can unbind');
 
 		signal.on('one', function() { hasTriggered = true; });
-		test.ok(signal._active.one, 'Single string can register');
+		test.ok(signal._events.one, 'Single string can register');
 
 		signal.trigger('one');
 		test.ok(hasTriggered, 'Single string can trigger');

@@ -2,67 +2,43 @@
  * https://github.com/JosephClay/signal-js
  * Copyright (c) 2013-2015 Joe Clay; License: MIT */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.signal=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var _ = require(5);
-var klassExtend = require(4);
+var extend = require(5);
+var klass = require(6);
 var Signal = require(2);
 
-Signal.extend = klassExtend;
+Signal.extend = klass;
 
 var create = function() {
 	var s = new Signal();
 	s.prototype = Signal.prototype;
-	s.extend = klassExtend;
+	s.extend = klass;
 	return s;
 };
 
 // Create a pub/sub to expose signal as
 // e.g. signal.on(), signal.trigger()
-var signal = _.extend(create, create());
+var signal = extend(create, create());
 signal.prototype = Signal.prototype;
 
 // setup create methods
 signal.create = create;
 
 // setup extension method
-signal.extend = klassExtend;
+signal.extend = klass;
 
 // Expose
 module.exports = signal;
 },{}],2:[function(require,module,exports){
 var undef, // safe undef
-    _      = require(5),
-    caller = require(3),
-
-    /**
-     * Holds cached, parsed event keys by string
-     * @type {Object}
-     */
-    cache = {},
-
-    parseConfig = function(str) {
-        var index = str.indexOf('.');
-        if (index === -1) { return { e: str, ns: '' }; }
-        return { e: str.substr(0, index), ns: str.substr(index + 1) };
-    },
-
-    reassignEvents = function(handle, first, second) {
-        second[handle] = second[handle] || {};
-        _.extend(second[handle], first[handle]);
-        delete first[handle];
-    };
+    caller = require(4),
+    cache = require(3);
 
 function Signal() {
     /**
      * Holds active events by handle + event + namespace
      * @type {Object}
      */
-    this._active = {};
-
-    /**
-     * Holds inactive events by handle - lazy creation
-     * @type {Object}
-     */
-    // this._inactive;
+    this._events = {};
 }
 
 var fn = Signal.prototype = {
@@ -70,17 +46,25 @@ var fn = Signal.prototype = {
     constructor: Signal,
 
     // Disable | Enable *************************************
-    // TODO: Disable and Enable
-    disable: function() {},
+    disable: function() {
+        this._disabled = true;
+        return this;
+    },
 
-    enable: function() {},
+    enable: function() {
+        this._disabled = false;
+        return this;
+    },
 
     // On | Off ************************************************
     on: function(name, fn) {
-        var config   = cache[name] || (cache[name] = parseConfig(name)),
+        // early return
+        if (!fn) { return; }
+
+        var config   = cache(name),
             e        = config.e,
             ns       = config.ns,
-            location = this._active,
+            location = this._events,
             evt      = location[e] || (location[e] = {}),
             ref      = evt[ns];
 
@@ -96,31 +80,32 @@ var fn = Signal.prototype = {
     },
 
     off: function(name) {
-        var config   = cache[name] || (cache[name] = parseConfig(name)),
+        var config   = cache(name),
             e        = config.e,
             ns       = config.ns,
-            location = this._active,
+            hasNs    = config.hasNs,
+            location = this._events,
             ref;
 
         // Has a namespace, wipe out that
         // specific namespace
-        if (ns !== '') {
+        if (hasNs) {
             if ((ref = location[e])) {
                 // this could be a function or
                 // an array, so wipe it out
                 ref[ns] = undef;
             }
-        } else {
-            // Does not have a namespace
-            // wipe out all events
-            ref[e] = {};
+        }
+
+        // Does not have a namespace
+        // wipe out all events
+        if (location[e]) {
+            location[e] = {};
         }
 
         return this;
     },
 
-    // TODO: Improve once implementation
-    // Based on underscore's once implementation
     once: function(eventname, callback) {
         var hasRan = false,
             memo;
@@ -137,11 +122,13 @@ var fn = Signal.prototype = {
 
     // Trigger ************************************************
     trigger: function(name) {
-        var location  = this._active,
-            config    = cache[name] || (cache[name] = parseConfig(name)),
+        if (this._disabled) { return this; }
+
+        var location  = this._events,
+            config    = cache(name),
             e         = config.e,
             ns        = config.ns,
-            nsDefined = ns !== '',
+            hasNs     = config.hasNs,
             ref;
 
         // early return
@@ -150,7 +137,7 @@ var fn = Signal.prototype = {
             !(ref = location[e]) ||
             // we have a namespace, but nothing
             // is registered there
-            (nsDefined && !(ref = ref[ns]))
+            (hasNs && !(ref = ref[ns]))
         ) { return this; }
         
         // we have a ref - which means we have a function
@@ -178,7 +165,7 @@ var fn = Signal.prototype = {
         
         // determine how to call this event
 
-        if (nsDefined) {
+        if (hasNs) {
             if (Array.isArray(ref)) {
                 // If there's a namespace, trigger only that array...
                 caller.call(ref, call);
@@ -204,13 +191,19 @@ var fn = Signal.prototype = {
         return this;
     },
 
+    // TODO
+    listeners: function(name) {
+    },
+    count: function(name) {
+    },
+
     // ListenTo | StopListening ********************************
     listenTo: function(obj, name, fn) {
         obj.on(name, fn);
         return this;
     },
-    stopListening: function(obj, name, fn) {
-        obj.off(name, fn);
+    stopListening: function(obj, name) {
+        obj.off(name);
         return this;
     }
 };
@@ -222,6 +215,34 @@ fn.emit            = fn.dispatch    = fn.trigger;
 
 module.exports = Signal;
 },{}],3:[function(require,module,exports){
+/**
+ * Holds cached, parsed event keys by string
+ * @type {Object}
+ */
+var cache = {};
+
+var parse = function(name) {
+    var index = name.indexOf('.');
+    
+    if (index === -1) {
+        return {
+            e: name,
+            ns: '',
+            hasNs: false,
+        };
+    }
+
+    return {
+        e: name.substr(0, index),
+        ns: name.substr(index + 1).split('.').sort().join('.'),
+        hasNs: true
+    };
+};
+
+module.exports = function(name) {
+    return cache[name] || (cache[name] = parse(name));
+};
+},{}],4:[function(require,module,exports){
 var apply = function(args) {
     return function(fn) {
         return fn.apply(null, args);
@@ -258,12 +279,8 @@ var callers = {
 
 module.exports = {
     create: function(args) {
-        var len = args.length;
-
-        // no args is easy
-        if (len === 0) { return noArgs; }
-
-        var caller = callers[len] || apply;
+        var length = args.length,
+            caller = callers[length] || apply;
         return caller(args);
     },
     
@@ -279,8 +296,28 @@ module.exports = {
         }
     }
 };
-},{}],4:[function(require,module,exports){
-var _ = require(5),
+},{}],5:[function(require,module,exports){
+/**
+ * Object merger
+ * @param {Objects}
+ * @return {Object}
+ */
+module.exports = function(base) {
+    var args = arguments,
+        idx = 1, length = args.length,
+        key, merger;
+    for (; idx < length; idx++) {
+        merger = args[idx];
+
+        for (key in merger) {
+            base[key] = merger[key];
+        }
+    }
+
+    return base;
+};
+},{}],6:[function(require,module,exports){
+var extend = require(5),
     Signal = require(2);
 
 /**
@@ -302,7 +339,7 @@ module.exports = function(constructor, extension) {
         };
 
     // Add properties to the object
-    _.extend(fn, Signal);
+    extend(fn, Signal);
 
     // Duplicate the prototype
     var NoOp = function() {};
@@ -310,42 +347,10 @@ module.exports = function(constructor, extension) {
     fn.prototype = new NoOp();
 
     // Merge the prototypes
-    _.extend(fn.prototype, Signal.prototype, extension);
+    extend(fn.prototype, Signal.prototype, extension);
     fn.prototype.constructor = constructor || fn;
 
     return fn;
-};
-},{}],5:[function(require,module,exports){
-var id = 0;
-
-module.exports = {
-    /**
-     * Unique Id
-     * @type {Number}
-     */
-    uniqueId: function() {
-        return id++;
-    },
-
-    /**
-     * Object merger
-     * @param {Objects}
-     * @return {Object}
-     */
-    extend: function(base) {
-        var args = arguments,
-            idx = 1, length = args.length,
-            key, merger;
-        for (; idx < length; idx++) {
-            merger = args[idx];
-
-            for (key in merger) {
-                base[key] = merger[key];
-            }
-        }
-
-        return base;
-    }
 };
 },{}]},{},[1])(1)
 });

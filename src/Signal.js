@@ -1,37 +1,13 @@
 var undef, // safe undef
-    _      = require('./utils'),
     caller = require('./caller'),
-
-    /**
-     * Holds cached, parsed event keys by string
-     * @type {Object}
-     */
-    cache = {},
-
-    parseConfig = function(str) {
-        var index = str.indexOf('.');
-        if (index === -1) { return { e: str, ns: '' }; }
-        return { e: str.substr(0, index), ns: str.substr(index + 1) };
-    },
-
-    reassignEvents = function(handle, first, second) {
-        second[handle] = second[handle] || {};
-        _.extend(second[handle], first[handle]);
-        delete first[handle];
-    };
+    cache = require('./cache');
 
 function Signal() {
     /**
      * Holds active events by handle + event + namespace
      * @type {Object}
      */
-    this._active = {};
-
-    /**
-     * Holds inactive events by handle - lazy creation
-     * @type {Object}
-     */
-    // this._inactive;
+    this._events = {};
 }
 
 var fn = Signal.prototype = {
@@ -39,17 +15,25 @@ var fn = Signal.prototype = {
     constructor: Signal,
 
     // Disable | Enable *************************************
-    // TODO: Disable and Enable
-    disable: function() {},
+    disable: function() {
+        this._disabled = true;
+        return this;
+    },
 
-    enable: function() {},
+    enable: function() {
+        this._disabled = false;
+        return this;
+    },
 
     // On | Off ************************************************
     on: function(name, fn) {
-        var config   = cache[name] || (cache[name] = parseConfig(name)),
+        // early return
+        if (!fn) { return; }
+
+        var config   = cache(name),
             e        = config.e,
             ns       = config.ns,
-            location = this._active,
+            location = this._events,
             evt      = location[e] || (location[e] = {}),
             ref      = evt[ns];
 
@@ -65,31 +49,32 @@ var fn = Signal.prototype = {
     },
 
     off: function(name) {
-        var config   = cache[name] || (cache[name] = parseConfig(name)),
+        var config   = cache(name),
             e        = config.e,
             ns       = config.ns,
-            location = this._active,
+            hasNs    = config.hasNs,
+            location = this._events,
             ref;
 
         // Has a namespace, wipe out that
         // specific namespace
-        if (ns !== '') {
+        if (hasNs) {
             if ((ref = location[e])) {
                 // this could be a function or
                 // an array, so wipe it out
                 ref[ns] = undef;
             }
-        } else {
-            // Does not have a namespace
-            // wipe out all events
-            ref[e] = {};
+        }
+
+        // Does not have a namespace
+        // wipe out all events
+        if (location[e]) {
+            location[e] = {};
         }
 
         return this;
     },
 
-    // TODO: Improve once implementation
-    // Based on underscore's once implementation
     once: function(eventname, callback) {
         var hasRan = false,
             memo;
@@ -106,11 +91,13 @@ var fn = Signal.prototype = {
 
     // Trigger ************************************************
     trigger: function(name) {
-        var location  = this._active,
-            config    = cache[name] || (cache[name] = parseConfig(name)),
+        if (this._disabled) { return this; }
+
+        var location  = this._events,
+            config    = cache(name),
             e         = config.e,
             ns        = config.ns,
-            nsDefined = ns !== '',
+            hasNs     = config.hasNs,
             ref;
 
         // early return
@@ -119,7 +106,7 @@ var fn = Signal.prototype = {
             !(ref = location[e]) ||
             // we have a namespace, but nothing
             // is registered there
-            (nsDefined && !(ref = ref[ns]))
+            (hasNs && !(ref = ref[ns]))
         ) { return this; }
         
         // we have a ref - which means we have a function
@@ -147,7 +134,7 @@ var fn = Signal.prototype = {
         
         // determine how to call this event
 
-        if (nsDefined) {
+        if (hasNs) {
             if (Array.isArray(ref)) {
                 // If there's a namespace, trigger only that array...
                 caller.call(ref, call);
@@ -173,13 +160,19 @@ var fn = Signal.prototype = {
         return this;
     },
 
+    // TODO
+    listeners: function(name) {
+    },
+    count: function(name) {
+    },
+
     // ListenTo | StopListening ********************************
     listenTo: function(obj, name, fn) {
         obj.on(name, fn);
         return this;
     },
-    stopListening: function(obj, name, fn) {
-        obj.off(name, fn);
+    stopListening: function(obj, name) {
+        obj.off(name);
         return this;
     }
 };

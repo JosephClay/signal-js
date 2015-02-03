@@ -1,4 +1,4 @@
-var _ = require('./utils'),
+var extend = require('./extend'),
     Signal = require('./Signal');
 
 /**
@@ -20,7 +20,7 @@ module.exports = function(constructor, extension) {
         };
 
     // Add properties to the object
-    _.extend(fn, Signal);
+    extend(fn, Signal);
 
     // Duplicate the prototype
     var NoOp = function() {};
@@ -28,7 +28,7 @@ module.exports = function(constructor, extension) {
     fn.prototype = new NoOp();
 
     // Merge the prototypes
-    _.extend(fn.prototype, Signal.prototype, extension);
+    extend(fn.prototype, Signal.prototype, extension);
     fn.prototype.constructor = constructor || fn;
 
     return fn;

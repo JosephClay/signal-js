@@ -1,26 +1,26 @@
-var _ = require('./utils');
-var klassExtend = require('./klassExtend');
+var extend = require('./extend');
+var klass = require('./klass');
 var Signal = require('./Signal');
 
-Signal.extend = klassExtend;
+Signal.extend = klass;
 
 var create = function() {
 	var s = new Signal();
 	s.prototype = Signal.prototype;
-	s.extend = klassExtend;
+	s.extend = klass;
 	return s;
 };
 
 // Create a pub/sub to expose signal as
 // e.g. signal.on(), signal.trigger()
-var signal = _.extend(create, create());
+var signal = extend(create, create());
 signal.prototype = Signal.prototype;
 
 // setup create methods
 signal.create = create;
 
 // setup extension method
-signal.extend = klassExtend;
+signal.extend = klass;
 
 // Expose
 module.exports = signal;
