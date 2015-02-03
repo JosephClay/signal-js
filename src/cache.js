@@ -22,6 +22,9 @@ var parse = function(name) {
     };
 };
 
-module.exports = function(name) {
+var api = module.exports = function(name) {
     return cache[name] || (cache[name] = parse(name));
+};
+api.clear = function() {
+    cache = {};
 };

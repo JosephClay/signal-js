@@ -1,10 +1,27 @@
 var undef, // safe undef
-    caller = require('./caller'),
-    cache = require('./cache');
+    caller  = require('./caller'),
+    cache   = require('./cache'),
+    isArray = Array.isArray;
+
+var pullEvents = function(evt) {
+    var subSignal, result = [];
+    for (var key in evt) {
+        subSignal = evt[key];
+        if (isArray(subSignal)) {
+            var idx = 0, length = subSignal.length;
+            for (; idx < length; idx++) {
+                result.push(subSignal[idx]);
+            }
+        } else {
+            result.push(subSignal);
+        }
+    }
+    return result;
+};
 
 function Signal() {
     /**
-     * Holds active events by handle + event + namespace
+     * Holds active events by event + namespace
      * @type {Object}
      */
     this._events = {};
@@ -39,7 +56,7 @@ var fn = Signal.prototype = {
 
         if (!ref) {
             evt[ns] = fn;
-        } else if (Array.isArray(ref)) {
+        } else if (isArray(ref)) {
             evt[ns].push(fn);
         } else {
             evt[ns] = [ref, fn];
@@ -135,9 +152,9 @@ var fn = Signal.prototype = {
         // determine how to call this event
 
         if (hasNs) {
-            if (Array.isArray(ref)) {
+            if (isArray(ref)) {
                 // If there's a namespace, trigger only that array...
-                caller.call(ref, call);
+                caller.run(ref, call);
             } else {
                 // ...or function
                 call(ref);
@@ -149,9 +166,9 @@ var fn = Signal.prototype = {
         var subSignal;
         for (var key in ref) {
             subSignal = ref[key];
-            if (Array.isArray(subSignal)) {
+            if (isArray(subSignal)) {
                 // If there's a namespace, trigger only that array...
-                caller.call(subSignal, call);
+                caller.run(subSignal, call);
             } else {
                 // ...or function
                 call(subSignal);
@@ -160,10 +177,43 @@ var fn = Signal.prototype = {
         return this;
     },
 
-    // TODO
     listeners: function(name) {
+        var location  = this._events;
+
+        // all events
+        if (name === undef) {
+            var result = [];
+            for (var evt in location) {
+                result = result.concat(pullEvents(location[evt]));
+            }
+            return result;
+        }
+
+        // specific event
+        var config    = cache(name),
+            e         = config.e,
+            ns        = config.ns,
+            hasNs     = config.hasNs;
+
+        // early return
+        if (
+            // the location doesn't exist
+            !(ref = location[e]) ||
+            // we have a namespace, but nothing
+            // is registered there
+            (hasNs && !(ref = ref[ns]))
+        ) { return []; }
+
+        // single namespace
+        if (hasNs) {
+            return !isArray(ref) ? [ref] : ref.slice();
+        }
+
+        // entire event
+        return pullEvents(ref);
     },
     count: function(name) {
+        return this.listeners(name).length;
     },
 
     // ListenTo | StopListening ********************************

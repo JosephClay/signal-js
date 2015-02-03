@@ -1,6 +1,7 @@
-var extend = require('./extend');
-var klass = require('./klass');
-var Signal = require('./Signal');
+var extend = require('./extend'),
+	klass  = require('./klass'),
+	Signal = require('./Signal'),
+	cache  = require('./cache');
 
 Signal.extend = klass;
 
@@ -18,6 +19,8 @@ signal.prototype = Signal.prototype;
 
 // setup create methods
 signal.create = create;
+
+signal.clearCache = cache.clear;
 
 // setup extension method
 signal.extend = klass;

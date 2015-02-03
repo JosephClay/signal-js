@@ -2,9 +2,10 @@
  * https://github.com/JosephClay/signal-js
  * Copyright (c) 2013-2015 Joe Clay; License: MIT */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.signal=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var extend = require(5);
-var klass = require(6);
-var Signal = require(2);
+var extend = require(5),
+	klass  = require(6),
+	Signal = require(2),
+	cache  = require(3);
 
 Signal.extend = klass;
 
@@ -23,6 +24,8 @@ signal.prototype = Signal.prototype;
 // setup create methods
 signal.create = create;
 
+signal.clearCache = cache.clear;
+
 // setup extension method
 signal.extend = klass;
 
@@ -30,12 +33,29 @@ signal.extend = klass;
 module.exports = signal;
 },{}],2:[function(require,module,exports){
 var undef, // safe undef
-    caller = require(4),
-    cache = require(3);
+    caller  = require(4),
+    cache   = require(3),
+    isArray = Array.isArray;
+
+var pullEvents = function(evt) {
+    var subSignal, result = [];
+    for (var key in evt) {
+        subSignal = evt[key];
+        if (isArray(subSignal)) {
+            var idx = 0, length = subSignal.length;
+            for (; idx < length; idx++) {
+                result.push(subSignal[idx]);
+            }
+        } else {
+            result.push(subSignal);
+        }
+    }
+    return result;
+};
 
 function Signal() {
     /**
-     * Holds active events by handle + event + namespace
+     * Holds active events by event + namespace
      * @type {Object}
      */
     this._events = {};
@@ -70,7 +90,7 @@ var fn = Signal.prototype = {
 
         if (!ref) {
             evt[ns] = fn;
-        } else if (Array.isArray(ref)) {
+        } else if (isArray(ref)) {
             evt[ns].push(fn);
         } else {
             evt[ns] = [ref, fn];
@@ -166,9 +186,9 @@ var fn = Signal.prototype = {
         // determine how to call this event
 
         if (hasNs) {
-            if (Array.isArray(ref)) {
+            if (isArray(ref)) {
                 // If there's a namespace, trigger only that array...
-                caller.call(ref, call);
+                caller.run(ref, call);
             } else {
                 // ...or function
                 call(ref);
@@ -180,9 +200,9 @@ var fn = Signal.prototype = {
         var subSignal;
         for (var key in ref) {
             subSignal = ref[key];
-            if (Array.isArray(subSignal)) {
+            if (isArray(subSignal)) {
                 // If there's a namespace, trigger only that array...
-                caller.call(subSignal, call);
+                caller.run(subSignal, call);
             } else {
                 // ...or function
                 call(subSignal);
@@ -191,10 +211,43 @@ var fn = Signal.prototype = {
         return this;
     },
 
-    // TODO
     listeners: function(name) {
+        var location  = this._events;
+
+        // all events
+        if (name === undef) {
+            var result = [];
+            for (var evt in location) {
+                result = result.concat(pullEvents(location[evt]));
+            }
+            return result;
+        }
+
+        // specific event
+        var config    = cache(name),
+            e         = config.e,
+            ns        = config.ns,
+            hasNs     = config.hasNs;
+
+        // early return
+        if (
+            // the location doesn't exist
+            !(ref = location[e]) ||
+            // we have a namespace, but nothing
+            // is registered there
+            (hasNs && !(ref = ref[ns]))
+        ) { return []; }
+
+        // single namespace
+        if (hasNs) {
+            return !isArray(ref) ? [ref] : ref.slice();
+        }
+
+        // entire event
+        return pullEvents(ref);
     },
     count: function(name) {
+        return this.listeners(name).length;
     },
 
     // ListenTo | StopListening ********************************
@@ -239,10 +292,24 @@ var parse = function(name) {
     };
 };
 
-module.exports = function(name) {
+var api = module.exports = function(name) {
     return cache[name] || (cache[name] = parse(name));
 };
+api.clear = function() {
+    cache = {};
+};
 },{}],4:[function(require,module,exports){
+// functionally abstracting the calls
+// to the function. this will net us
+// better gains when looping through
+// multiple namespaces and simplifies
+// logic for calling the event.
+// 
+// this is slower than event-emitter,
+// but ee doesn't have to worry about
+// namespaces, so they can do it a
+// little differently
+
 var apply = function(args) {
     return function(fn) {
         return fn.apply(null, args);
@@ -286,7 +353,7 @@ module.exports = {
     
     noArgs: noArgs,
 
-    call: function(events, call) {
+    run: function(events, call) {
         var idx = 0, length = events.length,
             evt;
         for (; idx < length; idx += 1) {
