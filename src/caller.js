@@ -42,6 +42,9 @@ module.exports = {
         var caller = callers[len] || apply;
         return caller(args);
     },
+    
+    noArgs: noArgs,
+
     call: function(events, call) {
         var idx = 0, length = events.length,
             evt;

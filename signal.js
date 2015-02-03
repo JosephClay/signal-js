@@ -30,7 +30,7 @@ signal.extend = klassExtend;
 module.exports = signal;
 },{}],2:[function(require,module,exports){
 var undef, // safe undef
-    _ = require(5),
+    _      = require(5),
     caller = require(3),
 
     /**
@@ -49,42 +49,6 @@ var undef, // safe undef
         second[handle] = second[handle] || {};
         _.extend(second[handle], first[handle]);
         delete first[handle];
-    },
-
-    callEvents = function(events, args) {
-        var idx = 0, length = events.length,
-            params = args.length,
-            evt;
-        for (; idx < length; idx += 1) {
-            evt = events[idx];
-            if (!evt) { continue; }
-
-            if (params === 0) {
-                if (evt() === false) { return; }
-                continue;
-            }
-            if (params === 1) {
-                if (evt(args[0]) === false) { return; }
-                continue;
-            }
-            if (params === 2) {
-                if (evt(args[0], args[1]) === false) { return; }
-                continue;
-            }
-            if (params === 3) {
-                if (evt(args[0], args[1], args[2]) === false) { return; }
-                continue;
-            }
-            if (evt.apply(null, args) === false) { return; }
-        }
-    },
-
-    eventLookup = function(eventConfig, location) {
-        var handle    = location[eventConfig.h] || (location[eventConfig.h] = {}),
-            evt       = handle[eventConfig.e]   || (handle[eventConfig.e]   = {}),
-            namespace = evt[eventConfig.ns]     || (evt[eventConfig.ns]     = []);
-
-        return namespace;
     };
 
 function Signal() {
@@ -99,12 +63,6 @@ function Signal() {
      * @type {Object}
      */
     // this._inactive;
-
-    /**
-     * Holds subscriptions - lazy creation
-     * @type {Object}
-     */
-    // this._subs;
 }
 
 var fn = Signal.prototype = {
@@ -198,22 +156,27 @@ var fn = Signal.prototype = {
         // we have a ref - which means we have a function
         // or an array of functions
         var args = arguments,
-            length = args.length;
+            length = args.length,
+            call;
 
-        // prevent this function from being de-optimized
-        // because of using the arguments:
-        // http://reefpoints.dockyard.com/2014/09/22/javascript-performance-for-the-win.html
-        // We only need the arguments after the event name
-        var idx = 1,
-            argArr = new Array(length - 1);
-        for (; idx < length; idx += 1) {
-            argArr[idx - 1] = args[idx];
+        if (length > 1) {
+            // prevent this function from being de-optimized
+            // because of using the arguments:
+            // http://reefpoints.dockyard.com/2014/09/22/javascript-performance-for-the-win.html
+            // We only need the arguments after the event name
+            var idx = 1,
+                argArr = new Array(length - 1);
+            for (; idx < length; idx += 1) {
+                argArr[idx - 1] = args[idx];
+            }
+            
+            // create a caller
+            call = caller.create(argArr);
+        } else {
+            call = caller.noArgs;
         }
-
-        // create a caller
-        var call = caller.create(argArr);
         
-        // determin how to call this event
+        // determine how to call this event
 
         if (nsDefined) {
             if (Array.isArray(ref)) {
@@ -303,6 +266,9 @@ module.exports = {
         var caller = callers[len] || apply;
         return caller(args);
     },
+    
+    noArgs: noArgs,
+
     call: function(events, call) {
         var idx = 0, length = events.length,
             evt;
