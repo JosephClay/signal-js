@@ -100,9 +100,9 @@ gulp.task('release', function() {
 });
 
 gulp.task('test', function() {
-    var path = require('path'),
+    var path     = require('path'),
         nodeunit = require('nodeunit').reporters.default,
-        dir = require('node-dir');
+        dir      = require('node-dir');
 
     var normalizeFilePaths = function(files) {
         return files.map(function(file) {
