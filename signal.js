@@ -246,7 +246,7 @@ var fn = Signal.prototype = {
         // entire event
         return pullEvents(ref);
     },
-    count: function(name) {
+    size: function(name) {
         return this.listeners(name).length;
     },
 

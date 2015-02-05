@@ -1,6 +1,7 @@
 ## signal
 
-A small (3.3KB minified, 2.6KB gzipped) and fast JavaScript event system with no dependencies. Great as a pubsub or to add event emitters to your code.
+A small (3.78KB minified, 3.6KB gzipped) and fast event system with no dependencies and namespacing. 
+Built for performance. Great as a pubsub or to add event emitters to your code.
 
 `npm install signal-js`
 
@@ -63,82 +64,17 @@ signal.off('example.foo');
 signal.off('.foo');
 ```
 
-## Handles
-Handles define another level of scope to events. The scope of the handle protects them from collission of other events (or even namespaces). Define a handle with a `:`.
+## Disable/Enable
+While disabled, a signal wont trigger any
+events, but can still be subscribed to.
 ```javascript
-// "change:" is the handle for the event "name"
-signal.on('change:name', function(name) {
-	console.log('name changed to: ', name);
-});
-
-// This event is in a different scope...
-signal.on('name', function(name) {
-	console.log('hi ', name);
-});
-
-// ...so that when we trigger it, we don't trigger
-// the event with the handle. This logs "hi Bill".
-signal.trigger('name', 'Bill');
-
-// logs "name changed to: David"
-signal.trigger('change:name', 'David');
-```
-
-Scoped handles also protect against the unbinding of events.
-```javascript
-signal.on('change:title.ns', function() {});
-signal.on('title.ns', function() {});
-
-// Unbinds "title.ns" but not "change:title",
-// even though "change:title" has the same namespace
-// it is in a different scope
-signal.off('.ns');
-
-// Now all events under the "change" handle with
-// the "ns" namespace are unbound
-signal.off('change:.ns');
-```
-
-Handles can also be activated and deactivated. Useful for persistent modules that need to be enabled and disabled. Instead of the overhead of unbinding and rebinding, the handle can be toggled.
-```javascript
-// "click" handle that we probably don't want to
-// have fired when our module is hidden...
-signal.on('click:button', function() {
-	console.log('click!');
-});
-
-// ...so we'll disable it
-signal.disable('click');
-
-// This doesn't log anything cause the
-// handle has been disabled
-signal.trigger('click:button');
-
-// Enable the handle and now we can trigger
-// the event. Logs "click!"
-signal.enable('click').trigger('click:button');
-```
-
-## Dispatch
-For events that need to be even faster, use `subscribe` and `dispatch`. There are no handles or namespaces. `subscribe` will return an id for the subscription that will have to be passed to `unsubscribe` to unbind the event.
-```javascript
-// Subscribe to the tick event...which will be triggered 60 times a second
-var id = signal.subscribe('tick', function(time) { console.log('tick'); });
-
-// Dispatch the event
-signal.dispatch('tick', Date.now());
-
-// To unsubscribe, pass the event and the id
-signal.unsubscribe('tick', id);
+signal.disable();
 ```
 
 ## Create
 ```javascript
 var pubSub = signal();
 ```
-
-## Extend
-`signal` comes with a klass-like `extend` method.
 
 ## Support
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JosephClay/signal-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
