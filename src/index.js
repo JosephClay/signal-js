@@ -25,5 +25,8 @@ signal.clearCache = cache.clear;
 // setup extension method
 signal.extend = klass;
 
+// version
+signal.VERSION = '1.0.0';
+
 // Expose
 module.exports = signal;
