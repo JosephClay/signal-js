@@ -2,7 +2,7 @@
   "name": "signal-js",
   "title": "signal-js",
   "description": "Small and simple JavaScript event system.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/JosephClay/signal-js",
   "license": "MIT",
   "main": "./src/index.js",

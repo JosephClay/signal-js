@@ -81,6 +81,7 @@ var fn = Signal.prototype = {
                 // an array, so wipe it out
                 ref[ns] = undef;
             }
+            return this;
         }
 
         // Does not have a namespace
@@ -125,7 +126,7 @@ var fn = Signal.prototype = {
             // is registered there
             (hasNs && !(ref = ref[ns]))
         ) { return this; }
-        
+
         // we have a ref - which means we have a function
         // or an array of functions
         var args = arguments,
@@ -142,13 +143,13 @@ var fn = Signal.prototype = {
             for (; idx < length; idx += 1) {
                 argArr[idx - 1] = args[idx];
             }
-            
+
             // create a caller
             call = caller.create(argArr);
         } else {
             call = caller.noArgs;
         }
-        
+
         // determine how to call this event
 
         if (hasNs) {
