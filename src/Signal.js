@@ -78,8 +78,8 @@ var fn = Signal.prototype = {
         if (hasNs) {
             if ((ref = location[e])) {
                 // this could be a function or
-                // an array, so wipe it out
-                ref[ns] = undef;
+                // an array, delete it
+                delete ref[ns];
             }
             return this;
         }
