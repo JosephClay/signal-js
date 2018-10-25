@@ -4,7 +4,7 @@ A small (`3.9KB` minified, `1.5KB` gzipped) and fast event system with no depend
 Written in es6 and built for performance. Great as a pubsub or to add event emitters 
 to your code.
 
-*Note:* Version 2 has landed! Many optimizations have been made and namespace support 
+**NOTE:** Version 2 has landed! Many optimizations have been made and namespace support 
 has been removed. The new code is half the size of the original, is between 200 and 600% 
 faster and has more tests!
 
