@@ -1,89 +1,167 @@
-## signal
+## signal-js
 
-A small (3.78KB minified, 3.6KB gzipped) and fast event system with no dependencies and namespacing. 
-Built for performance. Great as a pubsub or to add event emitters to your code.
+A small (`3.9KB` minified, `1.5KB` gzipped) and fast event system with no dependencies. 
+Written in es6 and built for performance. Great as a pubsub or to add event emitters 
+to your code.
+
+*Note:* Version 2 has landed! Many optimizations have been made and namespace support 
+has been removed. The new code is half the size of the original, is between 200 and 600% 
+faster and has more tests!
+
+## Installation
 
 `npm install signal-js`
 
 ## How to use
-Bind a function in a jquery-like fashion to signal using `on` or `bind`.
-```javascript
-var signal = require('signal-js');
 
-signal.on('basic', function(arg) {
-	console.log('args: ', arg);
-});
+Add a function to signal using `on` and trigger the function using `emit`
 
-// logs "args: 1"
-signal.trigger('basic', 1);
-```
-Define a namespace with a `.`
-```javascript
-signal.on('ns-event.mine', function(one, two, three) {
-	console.log('args: ', one, two, three);
-});
+```js
+import signal from 'signal-js';
 
-// logs "args: 3 2 1"
-signal.trigger('ns-event', 3, 2, 1);
-```
-another example
-```javascript
-signal.on('example', function(word) {
-	console.log('hi ', word);
-})
-.on('example.bye', function(word) {
-	console.log('bye ', word);
-});
+signal.on('basic', arg => console.log(arg);
 
-// logs "hi John", "bye John"
-signal.trigger('example', 'John');
-// only logs "bye John"
-signal.trigger('example.bye', 'John');
+signal.emit('basic', 1);
+// > 1
 ```
 
-`once` can also be used.
-```javascript
+Add multiple functions to the same event name
+
+```js
+import signal from 'signal-js';
+
+signal.on('multiple', () => console.log(1));
+signal.on('multiple', () => console.log(2));
+signal.on('multiple', () => console.log(3));
+
+signal.trigger('multiple);
+// > 1
+// > 2
+// > 3
+```
+
+Pass as many parameters as you need
+
+```js
+import signal from 'signal-js';
+
+signal.on('params', (one, two, three) => console.log(one, two, three));
+
+signal.emit('params', 1, 2, 3);
+// > 1 2 3
+```
+
+Remove events using `off`
+
+```js
+import signal from 'signal-js';
+
+signal.on('test', () => console.log('hi'))
+  .off('test') // removes all `test` events
+  .emit('test'); // nothing happens
+```
+
+`once` can also be used
+
+```js
+import signal from 'signal-js';
+
 signal.once('bam', function() {
-	console.log('Boom!');
+  console.log('Boom!');
 });
 
-// logs "Boom!"
-signal.trigger('bam')
-	// nothing is logged
-	.trigger('bam');
+signal.emit('bam')
+// > "Boom!"
+
+signal.emit('bam');
+// nothing is logged
 ```
 
-##### Off:
-Use `off` or `unbind` to unbind events.
-```javascript
-signal.on('example.foo', function() {});
+The exposed signal is a singleton, but other instances can also be created:
 
-// Unbinds the event
-signal.off('example.foo');
-// Unbinds all .foo namespaced events
-signal.off('.foo');
+```js
+import signal from 'signal-js';
+
+signal.on('foo', () => console.log('global'));
+
+const local = signal();
+local.on('foo', () => console.log('local'));
+
+const local2 = local();
+local2.on('foo', () => console.log('local2'));
+
+signal.emit('foo');
+// > "global"
+
+local.emit('foo');
+// > "local"
+
+local2.emit('foo');
+// > "local2"
 ```
 
-## Disable/Enable
-While disabled, a signal wont trigger any
-events, but can still be subscribed to.
-```javascript
-signal.disable();
-```
+# API
 
-## Create
-```javascript
-var pubSub = signal();
-```
+#### `*.on(eventName, listener)*`
+- `eventName` _string_ The name of the event
+- `listener` _Function_ The event handler
+- Returns: _signal_
+_Alias:_ `addListener`, `subscribe`, `bind`
 
-## Support
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JosephClay/signal-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+#### `*.off(eventName, listener)*`
+- `eventName` _string_ The name of the event
+- `listener` _Function_ The event handler
+- Returns: _signal_
+If `listener` is passed, the specific listener will be unbound, 
+otherwise all listeners under `eventName` will be unbound.
+_Alias:_ `removeListener`, `unsubscribe`, `unbind`
 
-#License
+#### `*.emit(eventName, [...parameters])*`
+- `eventName` _string_ The name of the event
+- `parameters` _any_ The arguments passed to the listener
+- Returns: _signal_
+_Alias:_ `dispatch`, `trigger`
+
+#### `*.once(eventName, listener)*`
+- `eventName` _string_ The name of the event
+- `parameters` _any_ The event handler
+- Returns: _signal_
+Adds a one-time `listener` that will remove itself after being invoked.
+
+#### `*.listeners(eventName)*`
+- `eventName` _string_ The name of the event
+- Returns: _Array_
+Retrieves registered `listeners` under the `eventName`. If no `eventName` 
+is passed, returns all `listeners`.
+
+#### `*.keys()*`
+- Returns: _Array_
+Retrieves all `eventNames`.
+
+#### `*.size(eventName)*`
+- `eventName` _string_ The name of the event
+- Returns: _Number_
+Returns the quantity of `listeners` at the given `eventName`. If no `eventName` 
+is passed, returns the quantity of all `listeners`.
+
+#### `*.disable()*`
+- Returns: _signal_
+Disables the signal. All methods can still be accessed and called. Any calls 
+to `emit` will be ignored.
+
+#### `*.enable()*`
+- Returns: _signal_
+Enables the signal.
+
+#### `*.clear()*`
+- Returns: _signal_
+Removes all `listeners` and `eventNames` from the signal.
+
+# License
 
 The MIT License (MIT)
 
-Copyright (c) 2014 Joseph Clay
+Copyright (c) 2018 Joseph Clay
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,14 +1,21 @@
 {
   "name": "signal-js",
   "title": "signal-js",
-  "description": "Small and simple JavaScript event system.",
-  "version": "1.0.2",
+  "description": "a small, simple es6 event system.",
+  "version": "2.0.0",
   "homepage": "https://github.com/JosephClay/signal-js",
   "license": "MIT",
-  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "main": "./dist/signal-js.min.js",
+  "browser": "./dist/signal-js.min.js",
   "scripts": {
-    "start": "npm install && gulp release",
-    "test": "npm install && gulp test"
+    "test": "node -r esm test",
+    "benchmark": "node -r esm test/benchmark",
+    "build": "webpack"
+  },
+  "engines": {
+    "node": "10.5.0",
+    "npm": "6.4.1"
   },
   "author": {
     "name": "Joe Clay",
@@ -18,19 +25,23 @@
     "type": "git",
     "url": "https://github.com/JosephClay/signal-js.git"
   },
+  "dependencies": {},
   "devDependencies": {
-    "browserify": "^6.3.3",
-    "bundle-collapser": "^1.1.0",
-    "gulp": "^3.8.9",
-    "gulp-gzip": "0.0.8",
-    "gulp-header": "^1.2.2",
-    "gulp-uglify": "^1.0.1",
-    "moment": "^2.8.3",
-    "node-dir": "^0.1.6",
-    "nodeunit": "^0.9.0",
-    "underscore": "^1.7.0",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.0.0"
-  },
-  "dependencies": {}
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/runtime": "^7.1.2",
+    "autoprefixer": "^9.3.1",
+    "babel-loader": "^8.0.4",
+    "benchmark": "^2.1.4",
+    "compression-webpack-plugin": "^2.0.0",
+    "css-mqpacker": "^7.0.0",
+    "date-fns": "^1.29.0",
+    "dotenv": "^6.0.0",
+    "esm": "^3.0.80",
+    "lodash": "^4.17.11",
+    "tape": "^4.9.1",
+    "webpack": "^4.22.0",
+    "webpack-cli": "^3.1.2"
+  }
 }

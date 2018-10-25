@@ -1,236 +1,144 @@
-var undef, // safe undef
-    caller  = require('./caller'),
-    cache   = require('./cache'),
-    isArray = Array.isArray;
+import { single, multiple } from './caller';
+import key from './key';
 
-var pullEvents = function(evt) {
-    var subSignal, result = [];
-    for (var key in evt) {
-        subSignal = evt[key];
-        if (isArray(subSignal)) {
-            var idx = 0, length = subSignal.length;
-            for (; idx < length; idx++) {
-                result.push(subSignal[idx]);
-            }
-        } else {
-            result.push(subSignal);
-        }
-    }
-    return result;
-};
+const formatMessage = (method, message) => `signal-js: method .${method} ${message}`;
 
-function Signal() {
-    /**
-     * Holds active events by event + namespace
-     * @type {Object}
-     */
-    this._events = {};
-}
+const isNumber = value => typeof value === 'number';
 
-var fn = Signal.prototype = {
+const isString = value => typeof value === 'string';
 
-    constructor: Signal,
+// https://gist.github.com/Integralist/749153aa53fea7168e7e
+const flatten = list => list.reduce(
+	(memo, value) => memo.concat(Array.isArray(value) ? flatten(value) : value), []
+);
 
-    // Disable | Enable *************************************
-    disable: function() {
-        this._disabled = true;
-        return this;
-    },
+const proto = {
+	// disable | enable *************************************
+	disable() {
+		this.disabled = true;
+		return this;
+	},
 
-    enable: function() {
-        this._disabled = false;
-        return this;
-    },
+	enable() {
+		this.disabled = false;
+		return this;
+	},
 
-    // On | Off ************************************************
-    on: function(name, fn) {
-        // early return
-        if (!fn) { return; }
+	// on | off ************************************************
+	on(name, fn) {
+		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('on', 'requires an event name'));
+		if (!fn) throw new Error(formatMessage('on', 'requires a function'));
 
-        var config   = cache(name),
-            e        = config.e,
-            ns       = config.ns,
-            location = this._events,
-            evt      = location[e] || (location[e] = {}),
-            ref      = evt[ns];
+		const location = this[key];
+		const fns = location.has(name) ? location.get(name) : location.set(name, []).get(name);
+		fns.push(fn);
+		
+		return this;
+	},
 
-        if (!ref) {
-            evt[ns] = fn;
-        } else if (isArray(ref)) {
-            evt[ns].push(fn);
-        } else {
-            evt[ns] = [ref, fn];
-        }
+	off(name, fn) {
+		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('off', 'requires an event name'));
 
-        return this;
-    },
+		const location = this[key];  
 
-    off: function(name) {
-        var config   = cache(name),
-            e        = config.e,
-            ns       = config.ns,
-            hasNs    = config.hasNs,
-            location = this._events,
-            ref;
+		if (!location.has(name)) return this;
 
-        // Has a namespace, wipe out that
-        // specific namespace
-        if (hasNs) {
-            if ((ref = location[e])) {
-                // this could be a function or
-                // an array, delete it
-                delete ref[ns];
-            }
-            return this;
-        }
+		// remove single
+		if (fn) {
+			const fns = location.get(name);
+			const index = fns.indexOf(fn);
+			index !== -1 && fns.splice(index, 1);
+			return this;
+		}
 
-        // Does not have a namespace
-        // wipe out all events
-        if (location[e]) {
-            location[e] = {};
-        }
+		// remove all
+		location.delete(name);
+		return this;
+	},
 
-        return this;
-    },
+	once(name, fn) {
+		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('once', 'requires an event name'));
+		if (!fn) throw new Error(formatMessage('once', 'requires a function'));
 
-    once: function(eventname, callback) {
-        var hasRan = false,
-            memo;
-        return this.on(eventname, function() {
-            if (hasRan) { return memo; }
-            hasRan = true;
+		// slow path the params...this is for flexibility
+		// and since these are single calls, the depotimization
+		// shouldn't be a concern
+		const callback = (...parms) => {
+			this.off(name, callback);
+			fn(...parms);
+		};
+		return this.on(name, callback);
+	},
 
-            memo = callback.apply(this, arguments);
-            callback = null;
+	// trigger ************************************************
+	trigger(name, arg) {
+		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('trigger', 'requires an event name'));
 
-            return memo;
-        });
-    },
+		if (this.disabled) return this;
 
-    // Trigger ************************************************
-    trigger: function(name) {
-        if (this._disabled) { return this; }
+		const location = this[key];
 
-        var location  = this._events,
-            config    = cache(name),
-            e         = config.e,
-            ns        = config.ns,
-            hasNs     = config.hasNs,
-            ref;
+		// nothing at the location
+		if (!location.has(name)) return this;
 
-        // early return
-        if (
-            // the location doesn't exist
-            !(ref = location[e]) ||
-            // we have a namespace, but nothing
-            // is registered there
-            (hasNs && !(ref = ref[ns]))
-        ) { return this; }
+		const fns = location.get(name);
 
-        // we have a ref - which means we have a function
-        // or an array of functions
-        var args = arguments,
-            length = args.length,
-            call;
+		// no events at the location
+		if (!fns.length) return this;
 
-        if (length > 1) {
-            // prevent this function from being de-optimized
-            // because of using the arguments:
-            // http://reefpoints.dockyard.com/2014/09/22/javascript-performance-for-the-win.html
-            // We only need the arguments after the event name
-            var idx = 1,
-                argArr = new Array(length - 1);
-            for (; idx < length; idx += 1) {
-                argArr[idx - 1] = args[idx];
-            }
+		// we have an array of functions to call
+		const args = arguments;
+		const length = args.length;
+		
+		// fast path
+		if (length <= 2) {
+			single(fns, arg);
+			return this;
+		}
 
-            // create a caller
-            call = caller.create(argArr);
-        } else {
-            call = caller.noArgs;
-        }
+		// prevent this function from being de-optimized
+		// because of using the arguments:
+		// http://reefpoints.dockyard.com/2014/09/22/javascript-performance-for-the-win.html
+		// We only need the arguments after the event name
+		let idx = 1;               
+		const argsArray = new Array(length - 1);
+		for (; idx < length; idx += 1) {
+			argsArray[idx - 1] = args[idx];
+		}
 
-        // determine how to call this event
+		multiple(fns, argsArray);
+		return this;
+	},
 
-        if (hasNs) {
-            if (isArray(ref)) {
-                // If there's a namespace, trigger only that array...
-                caller.run(ref, call);
-            } else {
-                // ...or function
-                call(ref);
-            }
-            return this;
-        }
+	// listeners / names ************************************************
+	listeners(name) {
+		const location = this[key];
 
-        // Else, trigger everything registered to the event
-        var subSignal;
-        for (var key in ref) {
-            subSignal = ref[key];
-            if (isArray(subSignal)) {
-                // If there's a namespace, trigger only that array...
-                caller.run(subSignal, call);
-            } else {
-                // ...or function
-                call(subSignal);
-            }
-        }
-        return this;
-    },
+		// make sure to always send an array and clean any 
+		// references so that we cant mutate to undefined behavior
+		return name === undefined ? flatten(Array.from(location.values())) :
+			location.has(name) ? location.get(name).slice() : [];
+	},
+	
+	names() {
+		const location = this[key];
+		return Array.from(location.keys());
+	},
 
-    listeners: function(name) {
-        var location  = this._events;
+	size(name) {
+		return this.listeners(name).length;
+	},
 
-        // all events
-        if (name === undef) {
-            var result = [];
-            for (var evt in location) {
-                result = result.concat(pullEvents(location[evt]));
-            }
-            return result;
-        }
-
-        // specific event
-        var config    = cache(name),
-            e         = config.e,
-            ns        = config.ns,
-            hasNs     = config.hasNs;
-
-        // early return
-        if (
-            // the location doesn't exist
-            !(ref = location[e]) ||
-            // we have a namespace, but nothing
-            // is registered there
-            (hasNs && !(ref = ref[ns]))
-        ) { return []; }
-
-        // single namespace
-        if (hasNs) {
-            return !isArray(ref) ? [ref] : ref.slice();
-        }
-
-        // entire event
-        return pullEvents(ref);
-    },
-    size: function(name) {
-        return this.listeners(name).length;
-    },
-
-    // ListenTo | StopListening ********************************
-    listenTo: function(obj, name, fn) {
-        obj.on(name, fn);
-        return this;
-    },
-    stopListening: function(obj, name) {
-        obj.off(name);
-        return this;
-    }
+	// clear ************************************************
+	clear() {
+		this[key].clear();
+		return this;
+	},
 };
 
 // proxy methods
-fn.addListener     = fn.subscribe   = fn.bind   = fn.on;
-fn.removeListender = fn.unsubscribe = fn.unbind = fn.off;
-fn.emit            = fn.dispatch    = fn.trigger;
+proto.addListener = proto.subscribe = proto.bind = proto.on;
+proto.removeListender = proto.unsubscribe = proto.unbind = proto.off;
+proto.emit = proto.dispatch = proto.trigger;
 
-module.exports = Signal;
+export default proto;
