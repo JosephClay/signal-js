@@ -34,7 +34,7 @@ signal.on('multiple', () => console.log(1));
 signal.on('multiple', () => console.log(2));
 signal.on('multiple', () => console.log(3));
 
-signal.trigger('multiple);
+signal.trigger('multiple');
 // > 1
 // > 2
 // > 3
@@ -102,58 +102,67 @@ local2.emit('foo');
 
 # API
 
-#### `*.on(eventName, listener)*`
+#### *`.on(eventName, listener)`*
 - `eventName` _string_ The name of the event
 - `listener` _Function_ The event handler
 - Returns: _signal_
+
 _Alias:_ `addListener`, `subscribe`, `bind`
 
-#### `*.off(eventName, listener)*`
+#### *`.off(eventName, listener)`*
 - `eventName` _string_ The name of the event
-- `listener` _Function_ The event handler
+- `listener` _Function_ (optional) The event handler
 - Returns: _signal_
+
 If `listener` is passed, the specific listener will be unbound, 
 otherwise all listeners under `eventName` will be unbound.
+
 _Alias:_ `removeListener`, `unsubscribe`, `unbind`
 
-#### `*.emit(eventName, [...parameters])*`
+#### *`.emit(eventName, [...parameters])`*
 - `eventName` _string_ The name of the event
-- `parameters` _any_ The arguments passed to the listener
+- `parameters` _any_ (optional) The arguments passed to the listener
 - Returns: _signal_
+
 _Alias:_ `dispatch`, `trigger`
 
-#### `*.once(eventName, listener)*`
+#### *`.once(eventName, listener)`*
 - `eventName` _string_ The name of the event
 - `parameters` _any_ The event handler
 - Returns: _signal_
+
 Adds a one-time `listener` that will remove itself after being invoked.
 
-#### `*.listeners(eventName)*`
+#### *`.listeners(eventName)`*
 - `eventName` _string_ The name of the event
 - Returns: _Array_
+
 Retrieves registered `listeners` under the `eventName`. If no `eventName` 
 is passed, returns all `listeners`.
 
-#### `*.keys()*`
+#### *`.keys()`*
 - Returns: _Array_
+
 Retrieves all `eventNames`.
 
-#### `*.size(eventName)*`
+#### *`.size(eventName)`*
 - `eventName` _string_ The name of the event
 - Returns: _Number_
+
 Returns the quantity of `listeners` at the given `eventName`. If no `eventName` 
 is passed, returns the quantity of all `listeners`.
 
-#### `*.disable()*`
+#### *`.disable()`*
 - Returns: _signal_
+
 Disables the signal. All methods can still be accessed and called. Any calls 
 to `emit` will be ignored.
 
-#### `*.enable()*`
+#### *`.enable()`*
 - Returns: _signal_
 Enables the signal.
 
-#### `*.clear()*`
+#### *`.clear()`*
 - Returns: _signal_
 Removes all `listeners` and `eventNames` from the signal.
 
