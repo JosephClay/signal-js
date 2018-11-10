@@ -70,9 +70,9 @@ const proto = {
 		return this.on(name, callback);
 	},
 
-	// trigger ************************************************
-	trigger(name, arg) {
-		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('trigger', 'requires an event name'));
+	// emit ************************************************
+	emit(name, arg) {
+		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('emit', 'requires an event name'));
 
 		if (this.disabled) return this;
 
@@ -139,6 +139,6 @@ const proto = {
 // proxy methods
 proto.addListener = proto.subscribe = proto.bind = proto.on;
 proto.removeListender = proto.unsubscribe = proto.unbind = proto.off;
-proto.emit = proto.dispatch = proto.trigger;
+proto.trigger = proto.dispatch = proto.emit;
 
 export default proto;
