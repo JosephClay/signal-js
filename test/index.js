@@ -73,6 +73,15 @@ test('event: add', assert => {
 	assert.end();
 });
 
+test('event: add invalid', assert => {
+	assert.plan(1);
+
+	const signal = src();
+	assert.throws(() => signal.on('foo', {}), `invalid function throws`);
+
+	assert.end();
+});
+
 test('event: symbol', assert => {
 	assert.plan(3);
 

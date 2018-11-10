@@ -3,6 +3,8 @@ import key from './key';
 
 const formatMessage = (method, message) => `signal-js: method .${method} ${message}`;
 
+const isFunction = value => typeof value === 'function';
+
 const isString = value => typeof value === 'string';
 
 const isSymbol = value => typeof value === 'symbol';
@@ -29,7 +31,7 @@ const proto = {
 	// on | off ************************************************
 	on(name, fn) {
 		if (!isValidKey(name)) throw new Error(formatMessage('on', 'requires an event name'));
-		if (!fn) throw new Error(formatMessage('on', 'requires a function'));// TODO: function check
+		if (!isFunction(fn)) throw new Error(formatMessage('on', 'requires a function'));
 
 		const location = this[key];
 		const fns = location.has(name) ? location.get(name) : location.set(name, new Set()).get(name);
@@ -64,7 +66,7 @@ const proto = {
 
 	once(name, fn) {
 		if (!isValidKey(name)) throw new Error(formatMessage('once', 'requires an event name'));
-		if (!fn) throw new Error(formatMessage('once', 'requires a function'));// TODO: function check
+		if (!isFunction(fn)) throw new Error(formatMessage('once', 'requires a function'));
 
 		// slow path the params...this is for flexibility
 		// and since these are single calls, the depotimization
