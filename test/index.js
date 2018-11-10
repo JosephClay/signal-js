@@ -73,6 +73,19 @@ test('event: add', assert => {
 	assert.end();
 });
 
+test('event: symbol', assert => {
+	assert.plan(3);
+
+	const signal = src();
+	const symbol = Symbol('foo');
+	let trigger = false;
+	assert.doesNotThrow(() => signal.on(symbol, function() { trigger = true; }), `symbol .on does not throw`);
+	assert.doesNotThrow(() => signal.emit(symbol), `symbol .emit does not throw`);
+	assert.is(trigger, true, `symbol event fired`);
+	
+	assert.end();
+});
+
 test('event: emit', assert => {
 	assert.plan(3);
 

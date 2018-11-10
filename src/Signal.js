@@ -3,9 +3,11 @@ import key from './key';
 
 const formatMessage = (method, message) => `signal-js: method .${method} ${message}`;
 
-const isNumber = value => typeof value === 'number';
-
 const isString = value => typeof value === 'string';
+
+const isSymbol = value => typeof value === 'symbol';
+
+const isValidKey = value => isString(value) || Number.isFinite(value) || isSymbol(value);
 
 // https://gist.github.com/Integralist/749153aa53fea7168e7e
 const flatten = list => list.reduce(
@@ -26,8 +28,8 @@ const proto = {
 
 	// on | off ************************************************
 	on(name, fn) {
-		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('on', 'requires an event name'));
-		if (!fn) throw new Error(formatMessage('on', 'requires a function'));
+		if (!isValidKey(name)) throw new Error(formatMessage('on', 'requires an event name'));
+		if (!fn) throw new Error(formatMessage('on', 'requires a function'));// TODO: function check
 
 		const location = this[key];
 		const fns = location.has(name) ? location.get(name) : location.set(name, new Set()).get(name);
@@ -37,7 +39,7 @@ const proto = {
 	},
 
 	off(name, fn) {
-		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('off', 'requires an event name'));
+		if (!isValidKey(name)) throw new Error(formatMessage('off', 'requires an event name'));
 
 		const location = this[key];  
 
@@ -61,8 +63,8 @@ const proto = {
 	},
 
 	once(name, fn) {
-		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('once', 'requires an event name'));
-		if (!fn) throw new Error(formatMessage('once', 'requires a function'));
+		if (!isValidKey(name)) throw new Error(formatMessage('once', 'requires an event name'));
+		if (!fn) throw new Error(formatMessage('once', 'requires a function'));// TODO: function check
 
 		// slow path the params...this is for flexibility
 		// and since these are single calls, the depotimization
@@ -76,7 +78,7 @@ const proto = {
 
 	// emit ************************************************
 	emit(name, arg) {
-		if (!isNumber(name) && !isString(name)) throw new Error(formatMessage('emit', 'requires an event name'));
+		if (!isValidKey(name)) throw new Error(formatMessage('emit', 'requires an event name'));
 
 		if (this.disabled) return this;
 
