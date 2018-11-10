@@ -30,8 +30,8 @@ const proto = {
 		if (!fn) throw new Error(formatMessage('on', 'requires a function'));
 
 		const location = this[key];
-		const fns = location.has(name) ? location.get(name) : location.set(name, []).get(name);
-		fns.push(fn);
+		const fns = location.has(name) ? location.get(name) : location.set(name, new Set()).get(name);
+		fns.add(fn);
 		
 		return this;
 	},
@@ -46,8 +46,12 @@ const proto = {
 		// remove single
 		if (fn) {
 			const fns = location.get(name);
-			const index = fns.indexOf(fn);
-			index !== -1 && fns.splice(index, 1);
+			
+			// remove this function
+			fns.has(fn) && fns.delete(fn);
+
+			// check size and delete location if empty
+			fns.size === 0 && location.delete(name);
 			return this;
 		}
 
@@ -84,14 +88,14 @@ const proto = {
 		const fns = location.get(name);
 
 		// no events at the location
-		if (!fns.length) return this;
+		if (!fns.size) return this;
 
 		// we have an array of functions to call
 		const args = arguments;
-		const length = args.length;
+		const numOfArgs = args.length;
 		
 		// fast path
-		if (length <= 2) {
+		if (numOfArgs <= 2) {
 			single(fns, arg);
 			return this;
 		}
@@ -101,8 +105,8 @@ const proto = {
 		// http://reefpoints.dockyard.com/2014/09/22/javascript-performance-for-the-win.html
 		// We only need the arguments after the event name
 		let idx = 1;               
-		const argsArray = new Array(length - 1);
-		for (; idx < length; idx += 1) {
+		const argsArray = new Array(numOfArgs - 1);
+		for (; idx < numOfArgs; idx += 1) {
 			argsArray[idx - 1] = args[idx];
 		}
 
@@ -116,8 +120,17 @@ const proto = {
 
 		// make sure to always send an array and clean any 
 		// references so that we cant mutate to undefined behavior
-		return name === undefined ? flatten(Array.from(location.values())) :
-			location.has(name) ? location.get(name).slice() : [];
+		
+		if (name !== undefined) {
+			return location.has(name) ? 
+				Array.from(location.get(name)) : 
+				[];
+		}
+
+		return flatten(
+			Array.from(location.values())
+				.map(set => Array.from(set))
+		);
 	},
 	
 	names() {
@@ -126,7 +139,19 @@ const proto = {
 	},
 
 	size(name) {
-		return this.listeners(name).length;
+		const location = this[key];
+
+		// make sure to always send an array and clean any 
+		// references so that we cant mutate to undefined behavior
+		
+		if (name !== undefined) {
+			return location.has(name) ? 
+				location.get(name).size : 
+				0;
+		}
+
+		return Array.from(location.values())
+			.reduce((memo, set) => memo + set.size, 0);
 	},
 
 	// clear ************************************************

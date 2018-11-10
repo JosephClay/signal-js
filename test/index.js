@@ -73,7 +73,7 @@ test('event: add', assert => {
 	assert.end();
 });
 
-test('event: trigger/emit', assert => {
+test('event: emit', assert => {
 	assert.plan(3);
 
 	const signal = src();
@@ -93,7 +93,7 @@ test('event: trigger/emit', assert => {
 	assert.end();
 });
 
-test('event: trigger/emit empty', assert => {
+test('event: emit empty', assert => {
 	assert.plan(1);
 
 	const signal = src();
@@ -108,13 +108,14 @@ test('event: remove', assert => {
 	const signal = src();
 	const evt = 'foo:bar.baz';
 	let trigger = 0;
-	const fn = () => { trigger += 1; };
-	signal.on(evt, fn);
-	signal.on(evt, fn);
+	const fn1 = () => { trigger += 1; };
+	const fn2 = () => { trigger += 1; };
+	signal.on(evt, fn1);
+	signal.on(evt, fn2);
 	
-	assert.is(signal.listeners(evt).length, 2, `successful registered events`);
+	assert.is(signal.size(evt), 2, `successful registered events`);
 	signal.off(evt);
-	assert.is(signal.listeners(evt).length, 0, `successful removed events`);
+	assert.is(signal.size(evt), 0, `successful removed events`);
 
 	signal.trigger(evt);
 	assert.is(trigger, 0, `event unbound successfully`);
@@ -259,7 +260,10 @@ test('params', assert => {
 });
 
 test('listeners', assert => {
-	assert.plan(4);
+	assert.plan(5);
+
+	const empty = src();
+	assert.is(empty.listeners().length, 0, 'an empty instance has no functions');
 
 	const signal = src();
 	const fn1 = () => {};

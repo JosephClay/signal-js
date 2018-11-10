@@ -8,14 +8,16 @@ const optimizedCallers = new Map([
 const multiCaller = (fn, args) => fn(...args);
 
 export const multiple = (fns, args) => {
-	const caller = optimizedCallers.get(args.length) || multiCaller;
-	for (let idx = 0; idx < fns.length; idx += 1) {
-		caller(fns[idx], args);
+	const caller = optimizedCallers.has(args.length) ? 
+		optimizedCallers.get(args.length) : 
+		multiCaller;
+	for (const fn of fns) {
+		caller(fn, args);
 	}
 };
 
 export const single = (fns, arg) => {
-	for (let idx = 0; idx < fns.length; idx += 1) {
-		fns[idx](arg);
+	for (const fn of fns) {
+		fn(arg);
 	}
 };
