@@ -170,7 +170,7 @@ Removes all `listeners` and `eventNames` from the signal.
 
 The MIT License (MIT)
 
-Copyright (c) 2018 Joseph Clay
+Copyright (c) 2019 Joseph Clay
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
