@@ -2,11 +2,11 @@
   "name": "signal-js",
   "title": "signal-js",
   "description": "a small, simple es6 event system.",
-  "version": "2.2.2",
+  "version": "2.3.2",
   "homepage": "https://github.com/JosephClay/signal-js",
   "license": "MIT",
+  "main": "./index.js",
   "module": "./src/index.js",
-  "main": "./src/index.js",
   "browser": "./dist/signal-js.min.js",
   "scripts": {
     "test": "node -r esm test",
@@ -25,7 +25,9 @@
     "type": "git",
     "url": "https://github.com/JosephClay/signal-js.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "esm": "^3.0.80"
+  },
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "@babel/plugin-transform-runtime": "^7.1.0",
@@ -38,7 +40,6 @@
     "css-mqpacker": "^7.0.0",
     "date-fns": "^1.29.0",
     "dotenv": "^7.0.0",
-    "esm": "^3.0.80",
     "lodash": "^4.17.11",
     "tape": "^4.9.1",
     "webpack": "^4.22.0",
