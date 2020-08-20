@@ -31,7 +31,7 @@ module.exports = {
 			entryOnly: true,
 			banner() {
 				const { homepage, author, version, license } = pkg;
-				const date = format(new Date(), 'YYYY-MM-DD');
+				const date = format(new Date(), 'yyyy-dd-MM');
 				const year = new Date().getFullYear();
 				return (`
 signal-js - v${version} - ${date}
