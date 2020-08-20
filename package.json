@@ -6,7 +6,6 @@
   "homepage": "https://github.com/JosephClay/signal-js",
   "license": "MIT",
   "main": "./index.js",
-  "module": "./src/index.js",
   "browser": "./dist/signal-js.min.js",
   "scripts": {
     "test": "node -r esm test",
