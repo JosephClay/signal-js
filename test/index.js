@@ -406,8 +406,6 @@ test('chaining', assert => {
 			.off('foo')
 			.once('bar', () => {})
 			.emit('bar')
-			.disable()
-			.enable()
 			.clear();
 	});
 
