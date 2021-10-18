@@ -8,7 +8,6 @@
   "sideEffects": false,
   "type": "module",
   "main": "./index.js",
-  "browser": "./dist/signal-js.min.js",
   "scripts": {
     "test": "node --experimental-specifier-resolution=node test",
     "benchmark": "node --experimental-specifier-resolution=node test/benchmark",
