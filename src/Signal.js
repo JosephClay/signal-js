@@ -1,6 +1,11 @@
-import { single, multiple } from './caller';
 import key from './key';
 import SignalError from './SignalError';
+import { single, multiple } from './caller';
+import {
+	isFunction,
+	isString,
+	isSymbol,
+} from './utils';
 
 const isValidKey = value => value != null && isString(value) || Number.isFinite(value) || isSymbol(value);
 
@@ -63,6 +68,7 @@ const proto = Object.assign(Object.create(null), {
 			this.off(name, callback);
 			fn(...parms);
 		};
+
 		return this.on(name, callback);
 	},
 
@@ -96,7 +102,7 @@ const proto = Object.assign(Object.create(null), {
 		// because of using the arguments:
 		// http://reefpoints.dockyard.com/2014/09/22/javascript-performance-for-the-win.html
 		// We only need the arguments after the event name
-		let idx = 1;               
+		let idx = 1;
 		const argsArray = new Array(numOfArgs - 1);
 		for (; idx < numOfArgs; idx += 1) {
 			argsArray[idx - 1] = args[idx];
