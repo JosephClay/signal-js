@@ -62,15 +62,14 @@ signal.on('test', () => console.log('hi'))
 ```js
 import signal from 'signal-js';
 
-signal.once('bam', function() {
-  console.log('Boom!');
-});
+let idx = 0;
+signal.once('tick', () => idx++);
 
-signal.emit('bam')
-// > "Boom!"
+signal.emit('tick')
+// idx = 1
 
-signal.emit('bam');
-// nothing is logged
+signal.emit('tick');
+// idx = 1
 ```
 
 The exposed signal is a singleton, but other instances can also be created:
