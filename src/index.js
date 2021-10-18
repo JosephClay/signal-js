@@ -13,8 +13,5 @@ const create = function() {
 // create a pub/sub to expose a signal singleton
 const signal = create();
 
-// version
-signal.VERSION = '2.0.0';
-
 // expose
 export default signal;
