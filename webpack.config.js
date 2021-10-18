@@ -1,10 +1,13 @@
-const path = require('path');
-const webpack = require('webpack');
-const pkg = require('./package.json');
-const { format } = require('date-fns');
-const CompressionPlugin = require('compression-webpack-plugin');
+import fs from 'fs';
+import path from 'path';
+import webpack from 'webpack';
+import { format } from 'date-fns';
+import TerserPlugin from 'terser-webpack-plugin';
+import CompressionPlugin from 'compression-webpack-plugin';
 
-module.exports = {
+const pkg = JSON.parse(fs.readFileSync('./package.json'));
+
+export default {
 	entry: './src/index.js',
 	mode: 'production',
 	devtool: 'source-map',
