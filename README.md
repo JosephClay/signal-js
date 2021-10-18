@@ -147,7 +147,7 @@ Retrieves all `eventNames`.
 Returns the quantity of `listeners` at the given `eventName`. If no `eventName` 
 is passed, returns the quantity of all `listeners`.
 
-#### *`.disable()`*
+#### *`.clear(eventName)`*
 - Returns: _signal_
 
 Disables the signal. All methods can still be accessed and called. Any calls 
