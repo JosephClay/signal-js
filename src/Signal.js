@@ -2,7 +2,7 @@ import { single, multiple } from './caller';
 import key from './key';
 import SignalError from './SignalError';
 
-const formatMessage = (method, message) => `signal-js: method .${method} ${message}`;
+const isValidKey = value => value != null && isString(value) || Number.isFinite(value) || isSymbol(value);
 
 const isFunction = value => typeof value === 'function';
 
