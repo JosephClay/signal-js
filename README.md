@@ -1,7 +1,7 @@
 ## signal-js
 
-A small (`3.9KB` minified, `1.5KB` gzipped) and fast event system with no dependencies. 
-Written in es6 and built for performance. Great as a pubsub or to add event emitters 
+A small (`2.4KB` minified, `1.07KB` gzipped) and fast event system with `0` dependencies. 
+Written in es2020 and built for performance. Great as a pubsub or to add event emitters 
 to your code.
 
 ## Installation
