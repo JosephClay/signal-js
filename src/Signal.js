@@ -148,7 +148,7 @@ const proto = {
 		// make sure to always send an array and clean any 
 		// references so that we cant mutate to undefined behavior
 		
-		if (name !== undefined) {
+		if (isValidKey(name)) {
 			return location.has(name) ? 
 				location.get(name).size : 
 				0;
