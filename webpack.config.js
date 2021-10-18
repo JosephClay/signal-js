@@ -26,6 +26,19 @@ export default {
 			}
 		]
 	},
+
+	optimization: {
+    moduleIds: 'named',
+    usedExports: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: true,
+        },
+      }),
+    ],
+  },
+
 	plugins: [
 		new webpack.EnvironmentPlugin({
 			NODE_ENV: 'production',
