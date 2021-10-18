@@ -168,7 +168,7 @@ test('event: remove invalid', assert => {
 	assert.plan(1);
 	
 	const signal = src();
-	assert.throws(() => signal.off(), `an event name is required for off`);
+	assert.throws(() => signal.off(), /requires event name/);
 
 	assert.end();
 });
@@ -187,8 +187,8 @@ test('event: once', assert => {
 	signal.trigger('foo');
 	assert.is(trigger, 1, `calling event again as not effect`);
 	
-	assert.throws(() => signal.once(undefined, () => {}), `once requires an event name`);
-	assert.throws(() => signal.once('foo'), `once requires an function`);
+	assert.throws(() => signal.once(undefined, () => {}), /requires event name/);
+	assert.throws(() => signal.once('foo'), /requires callback/);
 
 	assert.end();
 });
