@@ -1,11 +1,11 @@
-import key from './key';
-import SignalError from './SignalError';
-import { single, multiple } from './caller';
+import key from './key.js';
+import SignalError from './SignalError.js';
+import { single, multiple } from './caller.js';
 import {
 	isFunction,
 	isString,
 	isSymbol,
-} from './utils';
+} from './utils.js';
 
 const isValidKey = value => value != null && isString(value) || Number.isFinite(value) || isSymbol(value);
 

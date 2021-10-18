@@ -1,9 +1,9 @@
 import test from 'tape';
-import src from '../src';
-import key from '../src/key';
-import isObject from 'lodash/isObject';
-import isFunction from 'lodash/isFunction';
-import isPlainObject from 'lodash/isPlainObject';
+import src from '../src/index.js';
+import key from '../src/key.js';
+import isObject from 'lodash/isObject.js';
+import isFunction from 'lodash/isFunction.js';
+import isPlainObject from 'lodash/isPlainObject.js';
 
 test('global', assert => {
 	assert.plan(3);

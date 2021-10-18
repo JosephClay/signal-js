@@ -1,5 +1,5 @@
-import Signal from './Signal';
-import key from './key';
+import Signal from './Signal.js';
+import key from './key.js';
 
 const create = function() {
 	const signal = function signal() {

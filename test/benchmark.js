@@ -1,5 +1,5 @@
 import Benchmark from 'benchmark';
-import signal from '../src';
+import signal from '../src/index.js';
 
 const suite = new Benchmark.Suite();
 const randStr = () => Math.random().toString().split('.')[1];
