@@ -1,5 +1,6 @@
 import { single, multiple } from './caller';
 import key from './key';
+import SignalError from './SignalError';
 
 const formatMessage = (method, message) => `signal-js: method .${method} ${message}`;
 
@@ -30,8 +31,8 @@ const proto = {
 
 	// on | off ************************************************
 	on(name, fn) {
-		if (!isValidKey(name)) throw new Error(formatMessage('on', 'requires an event name'));
-		if (!isFunction(fn)) throw new Error(formatMessage('on', 'requires a function'));
+		if (!isValidKey(name)) throw SignalError('on', 'requires event name');
+		if (!isFunction(fn)) throw SignalError('on', 'requires callback');
 
 		const location = this[key];
 		const fns = location.has(name) ? location.get(name) : location.set(name, new Set()).get(name);
@@ -41,7 +42,7 @@ const proto = {
 	},
 
 	off(name, fn) {
-		if (!isValidKey(name)) throw new Error(formatMessage('off', 'requires an event name'));
+		if (!isValidKey(name)) throw SignalError('off', 'requires event name');
 
 		const location = this[key];  
 
@@ -65,8 +66,8 @@ const proto = {
 	},
 
 	once(name, fn) {
-		if (!isValidKey(name)) throw new Error(formatMessage('once', 'requires an event name'));
-		if (!isFunction(fn)) throw new Error(formatMessage('once', 'requires a function'));
+		if (!isValidKey(name)) throw SignalError('once', 'requires an event name');
+		if (!isFunction(fn)) throw SignalError('once', 'requires a function');
 
 		// slow path the params...this is for flexibility
 		// and since these are single calls, the depotimization
@@ -80,7 +81,7 @@ const proto = {
 
 	// emit ************************************************
 	emit(name, arg) {
-		if (!isValidKey(name)) throw new Error(formatMessage('emit', 'requires an event name'));
+		if (!isValidKey(name)) throw SignalError('emit', 'requires an event name');
 
 		if (this.disabled) return this;
 
