@@ -12,10 +12,6 @@ const isSymbol = value => typeof value === 'symbol';
 
 const isValidKey = value => isString(value) || Number.isFinite(value) || isSymbol(value);
 
-// https://gist.github.com/Integralist/749153aa53fea7168e7e
-const flatten = list => list.reduce(
-	(memo, value) => memo.concat(Array.isArray(value) ? flatten(value) : value), []
-);
 
 const proto = {
 	// disable | enable *************************************
