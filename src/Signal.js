@@ -10,17 +10,6 @@ import {
 const isValidKey = value => value != null && isString(value) || Number.isFinite(value) || isSymbol(value);
 
 const proto = Object.assign(Object.create(null), {
-	// disable | enable *************************************
-	disable() {
-		this.disabled = true;
-		return this;
-	},
-
-	enable() {
-		this.disabled = false;
-		return this;
-	},
-
 	// on | off ************************************************
 	on(name, fn) {
 		if (!isValidKey(name)) throw SignalError('on', 'requires event name');
@@ -75,8 +64,6 @@ const proto = Object.assign(Object.create(null), {
 	// emit ************************************************
 	emit(name, arg) {
 		if (!isValidKey(name)) throw SignalError('emit', 'requires an event name');
-
-		if (this.disabled) return this;
 
 		const location = this[key];
 
