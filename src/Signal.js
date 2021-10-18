@@ -159,11 +159,18 @@ const proto = {
 	},
 
 	// clear ************************************************
-	clear() {
+	clear(name) {
+		const location = this[key];
+
+		if (isValidKey(name)) {
+			location.has(name) && location.get(name).clear();
+			return this;
+		}
+
 		this[key].clear();
 		return this;
 	},
-};
+});
 
 // proxy methods
 proto.addListener = proto.subscribe = proto.bind = proto.on;
