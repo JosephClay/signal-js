@@ -4,16 +4,7 @@ import SignalError from './SignalError';
 
 const isValidKey = value => value != null && isString(value) || Number.isFinite(value) || isSymbol(value);
 
-const isFunction = value => typeof value === 'function';
-
-const isString = value => typeof value === 'string';
-
-const isSymbol = value => typeof value === 'symbol';
-
-const isValidKey = value => isString(value) || Number.isFinite(value) || isSymbol(value);
-
-
-const proto = {
+const proto = Object.assign(Object.create(null), {
 	// disable | enable *************************************
 	disable() {
 		this.disabled = true;
