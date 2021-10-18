@@ -131,10 +131,9 @@ const proto = {
 				[];
 		}
 
-		return flatten(
-			Array.from(location.values())
+		return Array.from(location.values())
 				.map(set => Array.from(set))
-		);
+				.flat();
 	},
 	
 	names() {
