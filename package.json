@@ -5,6 +5,8 @@
   "version": "2.4.0",
   "homepage": "https://github.com/JosephClay/signal-js",
   "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
   "main": "./index.js",
   "browser": "./dist/signal-js.min.js",
   "scripts": {
