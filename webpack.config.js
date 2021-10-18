@@ -21,6 +21,7 @@ export default {
 		rules: [
 			{
 				test: /\.js$/,
+				resolve: { fullySpecified: false },
 				exclude: /node_modules/,
 			}
 		]
