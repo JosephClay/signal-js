@@ -6,7 +6,7 @@ export interface Signal {
     on: listener
     off: listener
     once: listener
-    emit: (name: string, arg: any) => Signal
+    emit: (name: string, ...arg?: any[]) => Signal
     listeners: (name: string) => Signal
     names: () => string[]
     size: () => number
