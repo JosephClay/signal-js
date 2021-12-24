@@ -1,6 +1,6 @@
 type listener = (
     name: string,
-    fn: () => any) => Signal
+    fn: (...args: any[]) => any) => Signal
 
 export interface Signal {
     on: listener
