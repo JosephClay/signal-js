@@ -9,7 +9,7 @@ export interface Signal {
     emit: (eventName: string, ...arg?: any[]) => Signal
     listeners: (name: string) => Signal
     names: () => string[]
-    size: () => number
+    size: (eventName: string) => number
     clear: (eventName: string) => Signal
 }
 declare const proto: Signal
